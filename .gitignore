@@ -137,5 +137,7 @@ dist
 
 
 todo.md
+
+# IDE
 .idea/
 .vscode/
