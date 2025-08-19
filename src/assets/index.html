@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超慢呼吸暗角的模糊背景</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .background-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 底层背景 */
+        .background-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url("D:\\Downloads\\其他\\R-C.1e974c3e3f838c6e00c928832dd1b426.png");
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            filter: brightness(0.6);
+        }
+
+        /* 模糊层 */
+        .background-blur {
+            position: absolute;
+            width: 180%;
+            height: 180%;
+            left: -40%;
+            top: -40%;
+            background-image: url("D:\\Downloads\\其他\\R-C.1e974c3e3f838c6e00c928832dd1b426.png");
+            background-size: cover;
+            background-position: center;
+            filter: blur(100px) brightness(0.7);
+            z-index: 2;
+            transition: background-position 2.5s ease-in-out;
+        }
+
+        /* 额外的光斑层 */
+        .background-spot {
+            position: absolute;
+            width: 160%;
+            height: 160%;
+            left: -30%;
+            top: -30%;
+            background-image: url("D:\\Downloads\\其他\\R-C.1e974c3e3f838c6e00c928832dd1b426.png");
+            background-size: cover;
+            background-position: center;
+            filter: blur(80px) brightness(0.9);
+            z-index: 2;
+            transition: background-position 3.5s ease-in-out;
+            opacity: 0.7;
+        }
+
+        /* 呼吸暗角层 - 超慢动画版本 */
+        .background-vignette {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            /* CSS变量存储暗角参数 */
+            --center-size: 65%;
+            --transition-size: 80%;
+            --edge-darkness: 0.4;
+            /* 径向渐变背景 */
+            background: radial-gradient(circle at center,
+                    rgba(0, 0, 0, 0) var(--center-size),
+                    rgba(0, 0, 0, 0.2) var(--transition-size),
+                    rgba(0, 0, 0, var(--edge-darkness)) 100%);
+            /* 过渡动画设置 */
+            transition:
+                --center-size 30s ease-in-out,
+                --transition-size 30s ease-in-out,
+                --edge-darkness 30s ease-in-out;
+        }
+
+        /* CSS变量动画支持 */
+        @supports (transition: --center-size) {
+            .background-vignette {
+                transition-property: --center-size, --transition-size, --edge-darkness;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-container">
+        <div class="background-base"></div>
+        <div class="background-blur"></div>
+        <div class="background-spot"></div>
+        <div class="background-vignette"></div>
+    </div>
+
+    <script>
+        // 获取元素
+        const blurLayer = document.querySelector('.background-blur');
+        const spotLayer = document.querySelector('.background-spot');
+        const vignetteLayer = document.querySelector('.background-vignette');
+
+        // 光斑移动相关
+        function getRandomOffset(range) {
+            return Math.random() * range - range / 2;
+        }
+
+        function moveSpots() {
+            // 主要模糊层移动
+            const xOffset1 = getRandomOffset(150);
+            const yOffset1 = getRandomOffset(150);
+            blurLayer.style.backgroundPosition = `${xOffset1}px ${yOffset1}px`;
+
+            // 额外光斑层移动
+            const xOffset2 = getRandomOffset(200);
+            const yOffset2 = getRandomOffset(200);
+            spotLayer.style.backgroundPosition = `${xOffset2}px ${yOffset2}px`;
+
+            // 下次移动时间
+            const nextDelay = 1500 + Math.random() * 2500;
+            setTimeout(moveSpots, nextDelay);
+        }
+
+        // 暗角呼吸效果 - 超慢版本
+        let currentDirection = 1; // 1=扩大, -1=缩小
+        // 缩小变化范围，使效果更微妙
+        const minCenter = 63;
+        const maxCenter = 67;
+        const minTransition = 77;
+        const maxTransition = 83;
+        const minDarkness = 0.35;
+        const maxDarkness = 0.45;
+
+        function breatheVignette() {
+            // 获取当前值
+            let currentCenter = parseFloat(getComputedStyle(vignetteLayer).getPropertyValue('--center-size'));
+            let currentTransition = parseFloat(getComputedStyle(vignetteLayer).getPropertyValue('--transition-size'));
+            let currentDarkness = parseFloat(getComputedStyle(vignetteLayer).getPropertyValue('--edge-darkness'));
+
+            // 如果达到边界则改变方向
+            if (currentCenter >= maxCenter) currentDirection = -1;
+            if (currentCenter <= minCenter) currentDirection = 1;
+
+            // 极小的步长，使变化极其缓慢
+            const step = 0.01; // 每次变化的步长，比之前小50倍
+            const newCenter = Math.max(minCenter, Math.min(maxCenter, currentCenter + (currentDirection * step)));
+            const newTransition = Math.max(minTransition, Math.min(maxTransition, currentTransition + (currentDirection * step * 0.8)));
+            const newDarkness = currentDirection > 0
+                ? Math.max(minDarkness, currentDarkness - (step * 0.005))
+                : Math.min(maxDarkness, currentDarkness + (step * 0.005));
+
+            // 应用新值
+            vignetteLayer.style.setProperty('--center-size', `${newCenter}%`);
+            vignetteLayer.style.setProperty('--transition-size', `${newTransition}%`);
+            vignetteLayer.style.setProperty('--edge-darkness', newDarkness);
+
+            // 每100ms更新一次，进一步减慢视觉变化
+            setTimeout(breatheVignette, 100);
+        }
+
+        // 启动所有效果
+        moveSpots();
+        breatheVignette();
+    </script>
+</body>
+
+</html>

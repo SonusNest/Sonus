@@ -1,0 +1,52 @@
+[package]
+name = "sonus"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "sonus_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+json = "*"
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri-plugin-os = "2"
+winapi = {version = "0.3.9", features = [
+    "winnt", "sysinfoapi"
+] }
+winreg = "0.55.0"
+windows = "0.61.3"
+libloading = "0.8.8"
+raw-window-handle = "0.6.2"
+rusqlite = { version = "0.37.0", features = ["bundled"] }
+# 音频
+rodio = "0.21.1"
+# 音频元数据
+lofty = "0.22.4"
+# 时间
+chrono = { version = "0.4.41", features = ["serde"] }
+# 日志
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+# 异步
+tokio = {version = "1.47.1", features = ["full"]}
+uuid = { version = "1.18.0", features = ["v4"] }
+futures = "0.3.31"
+async-recursion = "1.1.1"
+md5 = "0.8.0"
+image = "0.25.6"
+base64 = "0.22.1"
+
