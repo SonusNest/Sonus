@@ -1,0 +1,2 @@
+# Spider
+This is a Python crawler sub-project that will be built into platform-specific executable files. The main program specifies fuzzy search keywords via command-line arguments. Based on the Token provided by the user, the crawler will visit third-party music platforms to crawl lyrics of the corresponding music and implement caching functionality. 

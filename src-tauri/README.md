@@ -33,11 +33,17 @@ src/
 │   │   ├── play_mode.rs     # 播放模式（顺序/循环/随机）实现
 │   │   └── persistence.rs   # 播放列表持久化存储
 │   │
-│   └── state/               # 全局状态管理
+│   ├── state/               # 全局状态管理
+│   │   ├── mod.rs
+│   │   ├── global.rs        # 全局状态定义与访问接口
+│   │   └── observer.rs      # 状态变更通知机制（观察者模式）
+│   │
+│   └── task_queue/          # 异步任务队列模块
 │       ├── mod.rs
-│       ├── global.rs        # 全局状态定义与访问接口
-│       └── observer.rs      # 状态变更通知机制（观察者模式）
-│
+│       ├── queue.rs         # 任务队列实现
+│       ├── task.rs          # 任务定义与执行
+│       ├── tauri_integration.rs        # Tauri与任务队列集成
+│       └── tracker.rs       # 任务执行状态跟踪
 ├── utils/                   # 工具与支撑层
 │   ├── mod.rs
 │   ├── config.rs            # 应用配置管理
