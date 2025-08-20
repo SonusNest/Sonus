@@ -31,5 +31,6 @@ pub mod ipc;
 pub mod app;
 pub mod core;
 pub mod utils;
+mod play;
 
 use core::task_queue::tauri_integration::init_task_queue;
