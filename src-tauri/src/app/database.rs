@@ -1,56 +1,10 @@
 use serde::Serialize;
-use rusqlite::{Connection, Result};
+use rusqlite::{Connection, Result, Row, ToSql};
 
 #[derive(Debug, Serialize)]
 pub struct Config {
     pub key: String,
     pub value: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct Music {
-    pub id: i64,
-    pub title: String,
-    pub album: String,
-    pub artist: String,
-    pub album_artist: String,
-    pub composer: String,
-    pub lyricist: String,
-    pub genre: String,
-    pub release_date: String,
-    pub track_number: i64,
-    pub disc_number: i64,
-    pub bpm: i64,
-    pub duration: i64,
-    pub cover_art: String,
-    pub audio_format: String,
-    pub audio_size: i64,
-    pub bitrate: i64,
-    pub sample_rate: i64,
-    pub file_path: String,
-    pub create_time: String,
-    pub update_time: String,
-    pub copyright: String,
-    pub remark: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct Playlist {
-    pub id: i64,
-    pub name: String,
-    pub create_time: String,
-    pub update_time: String,
-    pub remark: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct PlaylistMusic {
-    pub id: i64,
-    pub playlist_id: i64,
-    pub music_id: i64,
-    pub create_time: String,
-    pub update_time: String,
-    pub remark: String,
 }
 
 pub fn connection() -> Connection {
@@ -81,11 +35,25 @@ pub fn set_config_value(conn: &Connection, key: &str, value: &str) -> Result<()>
     Ok(())
 }
 
+pub fn query_with_params<T, F>(
+    conn: &Connection,
+    sql: &str,
+    params: &[&dyn ToSql],
+    mapper: F
+) -> Result<Vec<T>>
+where
+    F: FnMut(&Row) -> Result<T>
+{
+    let mut stmt = conn.prepare(sql)?;
+    let rows = stmt.query_map(params, mapper)?;
+    rows.collect()
+}
+
 pub fn execute(conn: &Connection, cmd: &str) -> Result<usize> {
     Ok(conn.execute(cmd, [])?)
 }
 
-pub fn execute_with_params(conn: &Connection, cmd: &str, params: &[&dyn rusqlite::types::ToSql]) -> Result<usize> {
+pub fn execute_with_params(conn: &Connection, cmd: &str, params: &[&dyn ToSql]) -> Result<usize> {
     Ok(conn.execute(cmd, params)?)
 }
 
