@@ -229,6 +229,7 @@ import {
     Earth,
     Server,
     FolderPlus,
+    // @ts-ignore
     Hammer
 } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
@@ -247,7 +248,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 

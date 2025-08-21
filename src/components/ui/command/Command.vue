@@ -64,6 +64,7 @@ function filterItems() {
   filterState.filtered.count = itemCount
 }
 
+// @ts-ignore
 function handleSelect() {
   filterState.search = ''
 }

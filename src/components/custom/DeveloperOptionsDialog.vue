@@ -11,7 +11,6 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
 
 const appStore = useAppStore()
 
