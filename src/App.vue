@@ -46,9 +46,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-screen w-screen">
+  <div class="h-screen w-screen relative">
     <RouterView />
     <!-- Public components -->
     <Toaster />
+    <!-- Internal Test Version Watermark -->
+    <div class="absolute bottom-[100px] right-[100px] text-white/50">
+      <p class="text-2xl font-bold">Internal Test Version</p>
+      <p class="text-sm text-right">v0.1.0-alpha-sha.gd90d9f8</p>
+    </div>
   </div>
 </template>
