@@ -9,6 +9,7 @@ use tracing::{info, debug};
 use async_recursion::async_recursion;
 use crate::core::task_queue::TaskStatus;
 use base64::engine::{general_purpose, Engine as _};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 
 #[derive(Debug)]
 pub struct DirectoryScanTask {
@@ -305,7 +306,7 @@ impl MetadataExtractionTask {
             let v: Vec<String> = tag.get_strings(&ItemKey::Genre).map(|s| s.to_string()).collect();
             if v.is_empty() { None } else { Some(v) }
         };
-        let release_date = tag.get_string(&ItemKey::ReleaseDate).map(|s| s.to_string());
+        let release_date = tag.get_string(&ItemKey::ReleaseDate).map(|s| s.to_string()).and_then(|date_str| DateTime::parse_from_rfc3339(&date_str).map(|dt| dt.with_timezone(&Utc)).ok());
         let track_number = tag.get_string(&ItemKey::TrackNumber).map(|s| s.to_string().parse::<u16>().unwrap());
         let disc_number = tag.get_string(&ItemKey::DiscNumber).map(|s| s.to_string().parse().unwrap());
         let disc_total = tag.get_string(&ItemKey::DiscTotal).map(|s| s.to_string().parse().unwrap());
@@ -318,8 +319,7 @@ impl MetadataExtractionTask {
             } else {
                 let mut s = String::from("data:image/png;base64,");
                 s.push_str(&bytes_to_base64(pictures[0].data()));
-                let test = String::from("test");
-                Some(vec!(test))
+                Some(vec!(s))
             }
         };
         let audio_format = Option::from(get_extension_from_filename(path.to_string()));
@@ -515,7 +515,7 @@ impl SqlGenerationTask {
                 escape_sql_string(composer.as_ref().map(|a| a.join(", ")).as_deref().unwrap_or("unknown")),
                 escape_sql_string(lyricist.as_ref().map(|a| a.join(", ")).as_deref().unwrap_or("none")),
                 escape_sql_string(genre.as_ref().map(|a| a.join(", ")).as_deref().unwrap_or("unknown")),
-                escape_sql_string(release_date.as_deref().unwrap_or("1970-01-01")),
+                release_date.map(|dt| escape_sql_string(&dt.to_rfc3339 ())).unwrap_or_else(|| "NULL".to_string ()),
                 track_number.unwrap_or(0),
                 disc_number.unwrap_or(0),
                 bpm.unwrap_or(0),
@@ -526,8 +526,8 @@ impl SqlGenerationTask {
                 bitrate.unwrap_or(0),
                 sample_rate.unwrap_or(0),
                 escape_sql_string(file_path),
-                create_time.unwrap_or(0),
-                update_time.unwrap_or(0),
+                create_time.map(|dt| escape_sql_string(&dt.to_rfc3339())).unwrap_or_else(|| "NULL".to_string()),
+                update_time.map(|dt| escape_sql_string(&dt.to_rfc3339())).unwrap_or_else(|| "NULL".to_string()),
                 escape_sql_string(copyright.as_deref().unwrap_or("unknown")),
                 escape_sql_string(remark.as_deref().unwrap_or("")),
                 path_type,

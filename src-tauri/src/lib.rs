@@ -15,11 +15,28 @@ pub fn run() {
             ipc::start_directory_scan,
             ipc::get_task_stats,
             ipc::register_task_listener,
+            // library commands
+            ipc::get_all_songs,
+            // player commands
+            ipc::play_to_playlist,
+            ipc::play_from,
+            ipc::play,
+            ipc::pause,
+            ipc::resume,
+            ipc::stop,
+            ipc::set_volume,
+            ipc::shutdown_player,
         ])
         .setup(|app| {
+            // init app
             let app_handle = app.handle();
             crate::app::init::init(&app_handle);
             init_task_queue(app.handle().clone())?;
+            // init player
+            let shared_state = core::player::state::new_shared_state();
+            let player_controller = new_shared_player_controller(shared_state)
+                .expect("Failed to initialize player controller");
+            app.manage(player_controller);
             Ok(())
         })
         .run(tauri::generate_context!())
@@ -33,4 +50,6 @@ pub mod core;
 pub mod utils;
 mod play;
 
+use tauri::Manager;
 use core::task_queue::tauri_integration::init_task_queue;
+use crate::core::controller::{new_shared_player_controller, PlayerController};

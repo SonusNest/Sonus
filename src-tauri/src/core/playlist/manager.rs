@@ -1,8 +1,10 @@
+use std::time::Duration;
 use chrono::{DateTime, Utc};
 use rand::prelude::SliceRandom;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 use crate::core::library::index::Track;
+use crate::core::player::audio_backend::AudioBackend;
 use super::play_mode::PlayMode;
 
 /**
@@ -16,6 +18,18 @@ pub struct Playlist {
     pub tracks: Vec<Track>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+}
+
+impl Playlist {
+    pub fn new() -> Self {
+        Self {
+            id: String::from(""),
+            name: String::from(""),
+            tracks: vec![],
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -75,6 +89,46 @@ impl PlaylistManager {
         }
     }
 
+    pub fn play(&mut self, backend: &mut AudioBackend) {
+        if let Some(index) = self.current_index {
+            backend.load_and_play(
+                self.playlist.tracks[index].file_path.clone(),
+                Duration::new(0, 0)
+            ).expect("Failed to load and play track");
+        } else {
+            if !self.playlist.tracks.is_empty() {
+                backend.load_and_play(
+                    self.playlist.tracks[0].file_path.clone(),
+                    Duration::new(0, 0)
+                ).expect("Failed to load and play first track");
+            }
+        }
+    }
+
+    pub fn pause(&self, backend: &mut AudioBackend) {
+        backend.pause();
+    }
+
+    pub fn resume(&self, backend: &mut AudioBackend) {
+        backend.resume();
+    }
+
+    pub fn stop(&self, backend: &mut AudioBackend) {
+        backend.stop();
+    }
+
+    pub fn set_volume(&self, backend: &mut AudioBackend, v: f32) {
+        backend.set_volume(v);
+    }
+
+    pub fn seek(&self, backend: &mut AudioBackend, pos: Duration) -> anyhow::Result<()> {
+        backend.seek(pos)
+    }
+
+    pub fn shutdown(&self, backend: &mut AudioBackend) {
+        backend.shutdown();
+    }
+
     pub fn next_track(&mut self) -> Option<&Track> {
         match self.play_mode {
             PlayMode::Repeat => self.next_track_repeat(),
@@ -94,7 +148,7 @@ impl PlaylistManager {
         // None
     }
 
-    pub fn next_track_repeat(&mut self) -> Option<&Track> {
+    fn next_track_repeat(&mut self) -> Option<&Track> {
         let tracks_len = self.playlist.tracks.len();
         if tracks_len == 0 {
             return None;
@@ -343,6 +397,7 @@ impl PlaylistManager {
     }
 
     pub fn insert_track_to_current_next(&mut self, track: Track) -> Result<(), String> {
+        tracing::info!("insert_track_to_current_next: {:?}", track.title);
         let tracks_len = self.get_playlist_tracks().len();
         // 处理 current_index 为 None 的情况：根据列表长度推断默认 current
         let current = self.current_index.unwrap_or_else(|| {

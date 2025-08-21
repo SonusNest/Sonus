@@ -1,4 +1,5 @@
 use std::fmt;
+use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use crate::core::task_queue::TaskStatus;
@@ -38,7 +39,7 @@ pub enum TaskData {
         composer: Option<Vec<String>>,
         lyricist: Option<Vec<String>>,
         genre: Option<Vec<String>>,
-        release_date: Option<String>,
+        release_date: Option<DateTime<Utc>>,
         track_number: Option<u16>,
         disc_number: Option<u16>,
         disc_total: Option<u16>,
@@ -50,8 +51,8 @@ pub enum TaskData {
         bitrate: Option<u32>,
         sample_rate: Option<u32>,
         file_path: String,
-        create_time: Option<u32>,
-        update_time: Option<u32>,
+        create_time: Option<DateTime<Utc>>,
+        update_time: Option<DateTime<Utc>>,
         copyright: Option<String>,
         remark: Option<String>,
         path_type: u8,

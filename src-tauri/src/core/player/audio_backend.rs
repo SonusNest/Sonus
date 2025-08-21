@@ -49,6 +49,7 @@ impl AudioBackend {
 
     /// 加载并从指定位置播放（position 可为 0）
     pub fn load_and_play<P: AsRef<Path>>(&mut self, path: P, position: Duration) -> Result<()> {
+        tracing::info!("load_and_play: {:?}", path.as_ref());
         let path_buf = path.as_ref().to_path_buf();
         let built = SymphoniaSource::from_path_start(&path_buf, position)?;
         let total = built.total_duration;

@@ -1,14 +1,15 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PlaybackState {
     Stopped,
     Playing,
     Paused,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PlayerState {
     playback_state: PlaybackState,
     volume: f32,
@@ -51,6 +52,42 @@ impl PlayerState {
     pub fn is_playing(&self) -> bool { self.playback_state == PlaybackState::Playing }
     pub fn is_paused(&self) -> bool { self.playback_state == PlaybackState::Paused }
     pub fn is_stopped(&self) -> bool { self.playback_state == PlaybackState::Stopped }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DurationWrapper(pub Duration);
+
+impl From<Duration> for DurationWrapper {
+    fn from(dur: Duration) -> Self {
+        DurationWrapper(dur)
+    }
+}
+
+impl From<DurationWrapper> for Duration {
+    fn from(wrapper: DurationWrapper) -> Self {
+        wrapper.0
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StateSnapshot {
+    pub playback_state: PlaybackState,
+    pub volume: f32,
+    pub current_position: u64, // 以毫秒为单位
+    pub total_duration: Option<u64>, // 以毫秒为单位
+    pub current_file: Option<String>,
+}
+
+impl From<&PlayerState> for StateSnapshot {
+    fn from(state: &PlayerState) -> Self {
+        StateSnapshot {
+            playback_state: state.playback_state(),
+            volume: state.volume(),
+            current_position: state.current_position().as_millis() as u64,
+            total_duration: state.total_duration().map(|d| d.as_millis() as u64),
+            current_file: state.current_file().map(|s| s.to_string()),
+        }
+    }
 }
 
 pub type SharedState = Arc<Mutex<PlayerState>>;
