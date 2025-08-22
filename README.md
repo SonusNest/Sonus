@@ -2,7 +2,7 @@
 <a href="https://github.com/SonusTeam/Sonus"><img src="https://file.lingke.ink/sonus/sonus-en.webp" alt="pARPxN8.png" border="0" /></a>
 </p>
 
-English | 简体中文
+English | [简体中文](https://github.com/SonusTeam/Sonus/blob/master/README-ZH.md)
 
 # Sonus
 Sonus is an open-source, lightweight cross-platform desktop application developed with Tauri + Rust. As a private music library management player, it not only manages music stored locally on the running device but also enables localized management of music in home private clouds (NAS) or remote servers via WebDAV and SMB protocols.
