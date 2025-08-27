@@ -118,10 +118,10 @@
             <div class="flex-1 w-full h-full" data-tauri-drag-region>
             </div>
             <div class="gap-1 flex flex-row mr-1">
-                <Button variant="ghost">
+                <Button variant="ghost" @click="lyricsOpen">
                     <MessageSquareQuote />
                 </Button>
-                <Button variant="ghost">
+                <Button variant="ghost" @click="playlistOpen">
                     <ListMusic />
                 </Button>
             </div>
@@ -265,6 +265,28 @@ const privateMusicDialogOpenFunc = (tab: string) => {
 const sidebarOpen = () => {
     appStore.setSidebarState(!appStore.getSidebarState)
 }
+const lyricsOpen = () => {
+  console.log(appStore.getRightArea + appStore.getRightAreaState)
+    if (appStore.getRightAreaState === true && appStore.getRightArea === 'lyrics') {
+        appStore.setRightAreaState(false)
+        appStore.setRightArea('null')
+        return
+    }
+    appStore.setRightArea('lyrics')
+    appStore.setRightAreaState(true)
+}
+
+const playlistOpen = () => {
+  console.log(appStore.getRightArea + appStore.getRightAreaState)
+    if (appStore.getRightAreaState === true && appStore.getRightArea === 'playlist') {
+        appStore.setRightAreaState(false)
+        appStore.setRightArea('null')
+        return
+    }
+    appStore.setRightArea('playlist')
+    appStore.setRightAreaState(true)
+}
+
 
 const logInAppleMusicAccount = () => {
     // toast.warning('Sorry, this feature is not implemented yet.')

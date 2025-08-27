@@ -1,6 +1,5 @@
 <template>
-    <div class="h-full w-full flex flex-col transition-colors duration-300 ease-in-out" :class=" { 'bg-transparent' :
-        appStore.getGlobalBackdropState, 'bg-background' : !appStore.getGlobalBackdropState }">
+    <div class="h-full w-full flex flex-col transition-colors duration-300 ease-in-out">
         <AppTopbar class="h-12" />
         <AppSidebar class="h-full" />
         <AppEndbar class="h-24 mt-2" />
@@ -49,13 +48,11 @@ const immersionDrawerOpen = computed({
     set(value) {
         if (appStore.getGlobalBackdropState) {
             setTimeout(() => {
-                appStore.setGlobalBackdropState(false)
-            }, 500) 
+            }, 500)
             appStore.setImmersionDrawerState(value)
         } else {
             setTimeout(() => {
-                appStore.setGlobalBackdropState(true)
-            }, 500) 
+            }, 500)
             appStore.setImmersionDrawerState(value)
         }
     }

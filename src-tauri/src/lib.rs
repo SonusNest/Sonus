@@ -26,6 +26,18 @@ pub fn run() {
             ipc::stop,
             ipc::set_volume,
             ipc::shutdown_player,
+            ipc::next_track,
+            ipc::previous_track,
+            ipc::insert_track_at,
+            ipc::insert_track_after_current,
+            ipc::add_track_to_end,
+            ipc::move_track,
+            ipc::remove_track,
+            ipc::clear_playlist,
+            ipc::overwrite_playlist,
+            ipc::set_play_mode,
+            ipc::get_current_index,
+            ipc::set_and_play_index
         ])
         .setup(|app| {
             // init app
@@ -34,7 +46,7 @@ pub fn run() {
             init_task_queue(app.handle().clone())?;
             // init player
             let shared_state = core::player::state::new_shared_state();
-            let player_controller = new_shared_player_controller(shared_state)
+            let player_controller = new_shared_player_controller(shared_state, app.handle().clone())
                 .expect("Failed to initialize player controller");
             app.manage(player_controller);
             Ok(())
@@ -48,7 +60,6 @@ pub mod ipc;
 pub mod app;
 pub mod core;
 pub mod utils;
-mod play;
 
 use tauri::Manager;
 use core::task_queue::tauri_integration::init_task_queue;

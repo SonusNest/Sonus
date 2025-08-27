@@ -137,12 +137,16 @@ export interface Song {
     artist: string[]
     genre: string[]
     duration: number
-    cover_art: string
+    cover_art: string[] // 不传播放列表和底栏组件不显示
     release_date: Date
     audio_format: string
     is_love: number
     remark: string
 }
+
+import {Track, usePlayerStore} from "@/stores/playerStore"
+
+const playerStore = usePlayerStore()
 
 const data = ref<Song[]>([])
 invoke("get_all_songs", {
@@ -192,17 +196,9 @@ const columns = [
 
         // 避免数据量，优化不必要数据
         //@ts-ignore
-        row.original.cover_art = [""]
         row.original.remark = ""
         const handlePlay = () => {
-          invoke("play_to_playlist", {
-            tracks: [row.original],
-            playMode: "Single",
-          }).then((res) => {
-            console.log(res)
-          }).catch((err) => {
-            console.error("播放失败:", err); // 错误时会捕获后端返回的字符串错误信息
-          });
+          playerStore.playTrack([row.original as Track])
         };
 
         return h("div", {

@@ -6,14 +6,15 @@ use super::library::index::Track;
 use super::player::audio_backend::AudioBackend;
 use super::player::state::{PlaybackState, SharedState};
 use super::playlist::manager::{Playlist, PlaylistManager};
-
+use tauri::AppHandle;
+use crate::core::playlist::play_mode;
 
 pub type SharedPlayerController = Arc<Mutex<PlayerController>>;
 
-pub fn new_shared_player_controller(state: SharedState) -> anyhow::Result<SharedPlayerController> {
+pub fn new_shared_player_controller(state: SharedState, app_handle: AppHandle) -> anyhow::Result<SharedPlayerController> {
     let playlist = Playlist::new();
     let playlist_manager = PlaylistManager::new(playlist);
-    let backend = AudioBackend::new(state.clone())?;
+    let backend = AudioBackend::new(state.clone(), app_handle)?;
     Ok(Arc::new(Mutex::new(PlayerController {
         playlist_manager,
         backend,
@@ -21,7 +22,7 @@ pub fn new_shared_player_controller(state: SharedState) -> anyhow::Result<Shared
     })))
 }
 pub struct PlayerController {
-    playlist_manager: PlaylistManager,
+    pub(crate) playlist_manager: PlaylistManager,
     backend: AudioBackend,
     state: SharedState,
 }
@@ -33,31 +34,32 @@ pub enum PlayMode {
 }
 
 impl PlayerController {
-    pub fn new(state: SharedState) -> anyhow::Result<Self> {
+    pub fn new(state: SharedState, app_handle: AppHandle) -> anyhow::Result<Self> {
         let playlist = Playlist::new();
         let playlist_manager = PlaylistManager::new(playlist);
-        let backend = AudioBackend::new(state.clone())?;
+        let backend = AudioBackend::new(state.clone(), app_handle)?;
         Ok(Self { playlist_manager, backend, state })
     }
 
     pub fn play_to_playlist(&mut self, tracks: Vec<Track>, play_mode: PlayMode) -> anyhow::Result<()> {
         match play_mode {
             PlayMode::Single => {
-                tracing::info!("play_to_playlist: {:?}", tracks[0].title);
-                self.playlist_manager.insert_track_to_current_next(tracks[0].clone()).expect("Failed to insert track to current next");
-                tracing::info!("into next track: {:?}", tracks[0].title);
-                tracing::info!("current track: {:?}", self.playlist_manager.get_current_track());
-                self.playlist_manager.next_track();
-                tracing::info!("current track: {:?}", self.playlist_manager.get_current_track());
+                // 原逻辑：插入单首到下一首并播放
+                self.playlist_manager.insert_track_to_current_next(tracks[0].clone())
+                    .expect("Failed to insert track to current next");
+                // self.playlist_manager.next_track();
                 self.play();
-                tracing::info!("playlist: {:?}", self.playlist_manager.get_playlist());
-                tracing::info!("playlist tracks: {:?}", self.playlist_manager.get_playlist_tracks());
+                // 新增：同步播放列表到状态
+                self.sync_all_to_state();
             }
             PlayMode::Queue => {
+                // 原逻辑：覆盖播放列表
                 let mut playlist = Playlist::new();
                 playlist.tracks = tracks;
                 self.playlist_manager.overwrite_playlist(&playlist);
                 self.playlist_manager.next_track();
+                // 新增：同步播放列表和模式到状态
+                self.sync_all_to_state();
             }
         }
         Ok(())
@@ -81,6 +83,14 @@ impl PlayerController {
     pub fn stop(&mut self) {
         self.playlist_manager.stop(&mut self.backend);
     }
+    
+    pub fn next_track(&mut self) {
+        self.playlist_manager.next_track();
+    }
+    
+    pub fn previous_track(&mut self) {
+        self.playlist_manager.previous_track();
+    }
 
     pub fn set_volume(&mut self, v: f32) {
         self.playlist_manager.set_volume(&mut self.backend, v);
@@ -103,5 +113,51 @@ impl PlayerController {
 
     pub fn shutdown(&mut self) {
         self.playlist_manager.shutdown(&mut self.backend);
+    }
+
+    pub fn overwrite_playlist(&mut self, playlist: &Playlist) {
+        // 调用PlaylistManager的方法修改播放列表
+        self.playlist_manager.overwrite_playlist(playlist);
+        // 同步到SharedState
+        self.sync_all_to_state();
+    }
+
+    pub fn set_play_mode(&mut self, new_mode: play_mode::PlayMode) {
+        // 调用PlaylistManager的方法修改播放模式（可能会改变播放列表顺序）
+        self.playlist_manager.set_play_mode(new_mode);
+        // 同步播放模式和播放列表到SharedState（因为切换模式可能打乱列表）
+        self.sync_all_to_state();
+    }
+
+    pub fn insert_track_at(&mut self, position: usize, track: Track) -> Result<(), String> {
+        let result = self.playlist_manager.insert_at(position, track);
+        // 无论插入成功与否，只要可能修改了列表，就同步状态
+        if result.is_ok() {
+            self.sync_all_to_state();
+        }
+        result
+    }
+
+    pub fn remove_track_at(&mut self, position: usize) -> Result<(), String> {
+        let result = self.playlist_manager.remove_at(position);
+        if result.is_ok() {
+            self.sync_all_to_state();
+        }
+        result
+    }
+
+    pub fn clear_playlist(&mut self) {
+        self.playlist_manager.clear();
+        self.sync_all_to_state();
+    }
+
+
+    // 辅助方法：同步所有相关数据到SharedState
+    fn sync_all_to_state(&mut self) {
+        let mut state = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        state.set_current_playlist(self.playlist_manager.get_playlist().clone());
+        state.set_current_track(self.playlist_manager.get_current_track().cloned());
+        state.set_current_play_mode(self.playlist_manager.play_mode);
+        state.set_current_index(self.playlist_manager.current_index);
     }
 }

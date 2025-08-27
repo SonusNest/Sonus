@@ -12,14 +12,18 @@ export const useAppStore = defineStore('app', {
                 return true
             }
         })(),
+        rightAreaState: false,
+        rightArea: 'lyrics',
         developerOptionsDialogState: false,
         aboutDialogState: false,
         immersionDrawerState: false,
-        globalBackdropState: false  // true: transparent, false: not transparent
+        globalBackdropState: true  // true: transparent, false: not transparent
     }),
     getters: {
         getSettingsDialogState: (state) => state.settingsDialogState,
         getSidebarState: (state) => state.sidebarState,
+        getRightAreaState: (state) => state.rightAreaState,
+        getRightArea: (state) => state.rightArea,
         getDeveloperOptionsDialogState: (state) => state.developerOptionsDialogState,
         getAboutDialogState: (state) => state.aboutDialogState,
         getImmersionDrawerState: (state) => state.immersionDrawerState,
@@ -36,6 +40,12 @@ export const useAppStore = defineStore('app', {
             } catch (error) {
                 console.error('Failed to save sidebarState to localStorage:', error)
             }
+        },
+        setRightAreaState(value: boolean) {
+            this.rightAreaState = value
+        },
+        setRightArea(value: string) {
+            this.rightArea = value
         },
         setDeveloperOptionsDialogState(value: boolean) {
             this.developerOptionsDialogState = value

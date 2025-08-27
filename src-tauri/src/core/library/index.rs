@@ -145,7 +145,7 @@ impl Track {
             }
 
             // 所有解析都失败
-            eprintln!("警告: 无法解析列 {} 的值", col_idx);
+            eprintln!("警告: 无法解析列 {} 的值, 列索引: {}", col_idx, col);
             None
         }
 

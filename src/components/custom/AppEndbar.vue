@@ -1,9 +1,9 @@
 <template>
     <div class="flex flex-col p-2 pl-30 pr-30">
         <div class="flex flex-row items-center gap-3 text-sm">
-            <span>02:13</span>
-            <Progress v-model="progress" />
-            <span>04:36</span>
+            <span>{{ playerStore.formattedCurrentTime }}</span>
+            <Progress v-model="playerStore.progressPercentage" />
+            <span>{{ playerStore.formattedTotalDuration }}</span>
         </div>
         <div class="flex flex-row items-center">
             <div class="flex flex-row items-center gap-1 text-sm">
@@ -11,7 +11,7 @@
                     <Button variant="ghost" class="hover:bg-transparent ">
                         <Shuffle />
                     </Button>
-                    <Button variant="ghost" class="hover:bg-transparent group">
+                    <Button variant="ghost" class="hover:bg-transparent group" @click="prevTrack">
                         <svg width="32" height="28" viewBox="0 0 32 28" xmlns="http://www.w3.org/2000/svg"
                             class="size-8" style="transform: rotateY(180deg);">
                             <path
@@ -28,7 +28,7 @@
                                 stroke-linejoin="round"></path>
                         </svg>
                     </Button>
-                    <Button variant="ghost" class="hover:bg-transparent group">
+                    <Button variant="ghost" class="hover:bg-transparent group" @click="nextTrack">
                         <svg width="32" height="28" viewBox="0 0 32 28" xmlns="http://www.w3.org/2000/svg"
                             class="size-8">
                             <path
@@ -52,8 +52,16 @@
                 </Button>
             </div>
             <div class="flex-1"></div>
-            <div class="text-sm">
-                There are no songs playing
+            <div class="text-sm flex flex-row items-center gap-2 text-sm">
+              <div class="w-[40px] h-[40px] rounded bg-center bg-cover"
+              :style="{
+                backgroundImage: bgi(playerStore.currentTrack?.cover_art)
+              }">
+              </div>
+                <div class="text-ellipsis whitespace-nowrap">
+                    <div class="text-[16px] font-bold">{{ playerStore.currentTrack?.title }}</div>
+                    <div class="text-xs text-foreground/60">{{ playerStore.currentTrack?.artist.join(', ') }}</div>
+                </div>
             </div>
             <div class="flex-1"></div>
             <div class="flex flex-row items-center gap-1 text-sm">
@@ -96,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import { Button } from '../ui/button'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -122,10 +130,13 @@ import { Slider } from '@/components/ui/slider'
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { useAppStore } from '@/stores/appStore'
+import { usePlayerStore } from '@/stores/playerStore'
+import { type PlaybackState } from '@/stores/playerStore'
+import DefaultCover from '@/assets/default.png'
 
 const appStore = useAppStore()
+const playerStore = usePlayerStore()
 
-const progress = ref(13)
 
 const repeatStatus = ref(0)
 const volumeStatus = ref(10)
@@ -138,25 +149,55 @@ const playPath = "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-
 const pausePath = "M14 3h5v18h-5zM5 3h5v18H5z"; // 合并两个rect为路径格式
 
 // 状态和引用
-const playStatus = ref(false); // false: 播放状态, true: 暂停状态
-const iconPath = ref<SVGPathElement | null>(null); 
+const playStatus = computed(() => playerStore.playbackState);
+const iconPath = ref<SVGPathElement | null>(null);
+
+const bgi = (background: string[]) => {
+  console.log(background)
+  if (background[0] === 'default') {
+    return 'url('+DefaultCover+')'
+  }
+  return 'url('+background.join(',')+')'
+}
+
+const nextTrack = () => {
+  playerStore.nextTrack()
+}
+
+const prevTrack = () => {
+  playerStore.prevTrack()
+}
 
 // 切换播放/暂停状态并执行动画
 const togglePlayPause = () => {
-    // 更新状态
-    playStatus.value = !playStatus.value;
+  // 确定目标SVG路径（根据当前状态）
+  const targetPath = playStatus.value === 'Playing' as PlaybackState
+      ? pausePath  // 播放中→切换到暂停图标
+      : playPath   // 暂停/停止→切换到播放图标
 
-    // 执行SVG变形动画
-    gsap.to(iconPath.value, {
-        duration: 0.4,
-        morphSVG: {
-            type: "rotational",
-            map: "complexity",
-            shape: playStatus.value ? pausePath : playPath
-        },
-        ease: "power3.inOut"
-    });
-};
+  // 执行SVG变形动画
+  gsap.to(iconPath.value, {
+    duration: 0.4,
+    morphSVG: {
+      type: "rotational",
+      map: "complexity",
+      shape: targetPath
+    },
+    ease: "power3.inOut"
+  })
+
+  // 同步更新播放状态（调用Store方法）
+  if (playStatus.value === 'Playing' as PlaybackState) {
+    playerStore.pause() // 播放中→暂停
+  } else {
+    // 暂停或停止状态→播放
+    if (playStatus.value === 'Stopped'as PlaybackState) {
+      playerStore.play() // 停止状态需重新播放
+    } else {
+      playerStore.resume() // 暂停状态恢复播放
+    }
+  }
+}
 
 // 组件挂载时初始化路径
 onMounted(() => {

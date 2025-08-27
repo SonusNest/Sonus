@@ -3,9 +3,10 @@ use chrono::{DateTime, Utc};
 use rand::prelude::SliceRandom;
 use serde::{Deserialize, Serialize};
 use tracing::info;
+use crate::app::database;
 use crate::core::library::index::Track;
 use crate::core::player::audio_backend::AudioBackend;
-use super::play_mode::PlayMode;
+pub(crate) use super::play_mode::PlayMode;
 
 /**
  * Playlist Manager
@@ -101,6 +102,7 @@ impl PlaylistManager {
                     self.playlist.tracks[0].file_path.clone(),
                     Duration::new(0, 0)
                 ).expect("Failed to load and play first track");
+                self.current_index = Some(0);
             }
         }
     }
@@ -195,16 +197,14 @@ impl PlaylistManager {
     }
 
     fn next_track_single(&mut self) -> Option<&Track> {
-        match self.play_mode {
-            PlayMode::Repeat => self.previous_track_repeat(), // 循环模式使用新逻辑
-            _ => self.previous_track_default(), // 其他模式保持原有逻辑
-        }
+        self.get_current_track()
     }
 
     pub fn previous_track(&mut self) -> Option<&Track> {
         match self.play_mode {
-            PlayMode::Repeat => self.previous_track_repeat(), // 循环模式使用新逻辑
-            _ => self.previous_track_default(), // 其他模式保持原有逻辑
+            PlayMode::Repeat => self.previous_track_repeat(),
+            PlayMode::Single => self.get_current_track(), // 单曲模式返回当前曲目
+            _ => self.previous_track_default(),
         }
     }
 
@@ -369,9 +369,14 @@ impl PlaylistManager {
     }
 
     pub fn overwrite_playlist(&mut self, playlist: &Playlist) {
+        let old_current_track = self.get_current_track().cloned(); // 保存原当前曲目
         self.playlist = playlist.clone();
         self.original_tracks = playlist.tracks.clone();
-        self.current_index = None;
+
+        // 若新列表中存在原当前曲目，同步索引
+        self.current_index = old_current_track.as_ref()
+            .and_then(|old| self.playlist.tracks.iter().position(|t| t.id == old.id));
+
         self.playlist.updated_at = Utc::now();
     }
 
@@ -509,6 +514,11 @@ impl PlaylistManager {
 
     fn switch_to_random_mode(&mut self) {
         let tracks_len = self.original_tracks.len();
+        if tracks_len == 0 {
+            self.playlist.tracks.clear();
+            self.current_index = None; // 明确置空
+            return;
+        }
         if tracks_len <= 1 {
             // 曲目数量≤1时无需打乱
             self.playlist.tracks = self.original_tracks.clone();

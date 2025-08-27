@@ -11,9 +11,9 @@
             </p>
         </div>
         <div class="w-full flex flex-row items-center gap-3 text-sm text-white/70 mt-5 mb-2">
-            <span>{{ formatTime(playerStore.currentTime) }}</span>
+<!--            <span>{{ formatTime(playerStore.currentTime) }}</span>-->
             <Progress v-model="progress" class="w-full" />
-            <span>{{ formatTime(playerStore.duration) }}</span>
+<!--            <span>{{ formatTime(playerStore.duration) }}</span>-->
         </div>
         <div class="flex flex-row items-center mb-2">
             <Button variant="ghost" class="hover:bg-transparent ">
@@ -59,30 +59,32 @@
         },
     })
 
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted,
+  // watch
+    } from 'vue'
 
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { Shuffle, Rewind, FastForward, Repeat, Repeat1, Repeat2 } from 'lucide-vue-next'
-import { usePlayerStore } from '@/stores/playerStore';
+// import { usePlayerStore } from '@/stores/playerStore';
 
-const formatTime = (seconds: number): string => {
-    // 处理NaN或无效值的情况
-    if (isNaN(seconds) || seconds < 0) {
-        return "00:00";
-    }
-
-    // 计算分钟和剩余秒数
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-
-    // 补零操作，确保始终显示两位数
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
-
-const playerStore = usePlayerStore()
+// const formatTime = (seconds: number): string => {
+//     // 处理NaN或无效值的情况
+//     if (isNaN(seconds) || seconds < 0) {
+//         return "00:00";
+//     }
+//
+//     // 计算分钟和剩余秒数
+//     const mins = Math.floor(seconds / 60);
+//     const secs = Math.floor(seconds % 60);
+//
+//     // 补零操作，确保始终显示两位数
+//     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+// };
+//
+// const playerStore = usePlayerStore()
 
 const progress = ref(0)
 const repeatStatus = ref(0)
@@ -106,11 +108,11 @@ const togglePlayPause = () => {
         ease: "power3.inOut"
     });
 
-    playerStore.setIsPlaying(!playerStore.isPlaying)
+    // playerStore.setIsPlaying(!playerStore.isPlaying)
 };
-watch(() => playerStore.currentTime, (newValue) => {
-    progress.value = (newValue / playerStore.duration) * 100
-})
+// watch(() => playerStore.currentTime, (newValue) => {
+//     progress.value = (newValue / playerStore.duration) * 100
+// })
 onMounted(() => {
     if (iconPath.value) {
         iconPath.value.setAttribute('d', playPath);

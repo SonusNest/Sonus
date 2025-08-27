@@ -7,6 +7,8 @@ use crate::core::controller;
 use crate::core::controller::{PlayMode, PlayerController, SharedPlayerController};
 use crate::core::library::index::Track;
 use crate::core::player::state::{PlaybackState, StateSnapshot};
+use crate::core::playlist::manager::Playlist;
+use crate::core::playlist::play_mode;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct DurationMs(pub u64);
@@ -49,6 +51,9 @@ pub struct PlayerStatus {
     pub current_position: DurationMs,
     pub total_duration: Option<DurationMs>,
     pub current_file: Option<String>,
+    pub current_track: Option<Track>,
+    pub current_playlist: Playlist,
+    pub play_mode: play_mode::PlayMode,
 }
 
 // 辅助函数：获取控制器的可变锁（简化代码）
@@ -143,7 +148,7 @@ pub fn seek(
 // 9. 获取当前播放器状态
 #[tauri::command]
 pub fn get_player_status(controller: State<SharedPlayerController>) -> PlayerStatus {
-    let controller = get_controller_lock(&controller); // 这里不需要可变锁，但统一用同一个函数
+    let controller = get_controller_lock(&controller); 
     let (state, volume, pos, total, file) = controller.snapshot();
 
     PlayerStatus {
@@ -152,6 +157,9 @@ pub fn get_player_status(controller: State<SharedPlayerController>) -> PlayerSta
         current_position: pos.into(),
         total_duration: total.map(|d| d.into()),
         current_file: file,
+        current_track: controller.playlist_manager.get_current_track().cloned(),
+        current_playlist: controller.playlist_manager.get_playlist().clone(),
+        play_mode: controller.playlist_manager.play_mode.clone(),
     }
 }
 
@@ -162,3 +170,163 @@ pub fn shutdown_player(controller: State<SharedPlayerController>) {
     controller.shutdown();
 }
 
+// 修复的下一首曲目命令
+#[tauri::command]
+pub fn next_track(controller: State<SharedPlayerController>) -> Result<Option<Track>, String> {
+    tracing::info!("next_track called");
+    let mut controller = get_controller_lock(&controller);
+
+    // 先获取下一首曲目并存储
+    let next = controller.playlist_manager.next_track().cloned();
+
+    // 再调用播放方法
+    if next.is_some() {
+        controller.play();
+    }
+
+    Ok(next)
+}
+
+// 修复的上一首曲目命令
+#[tauri::command]
+pub fn previous_track(controller: State<SharedPlayerController>) -> Result<Option<Track>, String> {
+    tracing::info!("previous_track called");
+    let mut controller = get_controller_lock(&controller);
+
+    // 先获取上一首曲目并存储
+    let prev = controller.playlist_manager.previous_track().cloned();
+
+    // 再调用播放方法
+    if prev.is_some() {
+        controller.play();
+    }
+
+    Ok(prev)
+}
+
+
+// 13. 在指定位置插入曲目
+#[tauri::command]
+pub fn insert_track_at(
+    controller: State<SharedPlayerController>,
+    position: usize,
+    track: Track
+) -> Result<Playlist, String> {
+    tracing::info!("insert_track_at called: position {}", position);
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.insert_at(position, track)?;
+    Ok(controller.playlist_manager.get_playlist().clone())
+}
+
+// 14. 在当前曲目后插入曲目
+#[tauri::command]
+pub fn insert_track_after_current(
+    controller: State<SharedPlayerController>,
+    track: Track
+) -> Result<Playlist, String> {
+    tracing::info!("insert_track_after_current called");
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.insert_track_to_current_next(track)?;
+    Ok(controller.playlist_manager.get_playlist().clone())
+}
+
+// 15. 添加曲目到播放列表末尾
+#[tauri::command]
+pub fn add_track_to_end(
+    controller: State<SharedPlayerController>,
+    track: Track
+) -> Result<Playlist, String> {
+    tracing::info!("add_track_to_end called");
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.insert_track_to_end(track)?;
+    Ok(controller.playlist_manager.get_playlist().clone())
+}
+
+// 16. 移动曲目位置
+#[tauri::command]
+pub fn move_track(
+    controller: State<SharedPlayerController>,
+    from_index: usize,
+    to_position: usize
+) -> Result<Playlist, String> {
+    tracing::info!("move_track called: from {} to {}", from_index, to_position);
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.insert_at_by_index(from_index, to_position)?;
+    Ok(controller.playlist_manager.get_playlist().clone())
+}
+
+// 17. 删除指定位置的曲目
+#[tauri::command]
+pub fn remove_track(
+    controller: State<SharedPlayerController>,
+    position: usize
+) -> Result<Playlist, String> {
+    tracing::info!("remove_track called: position {}", position);
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.remove_at(position)?;
+    Ok(controller.playlist_manager.get_playlist().clone())
+}
+
+// 18. 清空播放列表
+#[tauri::command]
+pub fn clear_playlist(
+    controller: State<SharedPlayerController>
+) -> Result<Playlist, String> {
+    tracing::info!("clear_playlist called");
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.clear();
+    Ok(controller.playlist_manager.get_playlist().clone())
+}
+
+// 19. 覆盖当前播放列表
+#[tauri::command]
+pub fn overwrite_playlist(
+    controller: State<SharedPlayerController>,
+    playlist: Playlist
+) -> Result<Playlist, String> {
+    tracing::info!("overwrite_playlist called: {}", playlist.name);
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.overwrite_playlist(&playlist);
+    Ok(controller.playlist_manager.get_playlist().clone())
+}
+
+// 20. 设置播放模式
+#[tauri::command]
+pub fn set_play_mode(
+    controller: State<SharedPlayerController>,
+    mode: play_mode::PlayMode
+) -> Result<play_mode::PlayMode, String> {
+    tracing::info!("set_play_mode called: {:?}", mode);
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.set_play_mode(mode.clone());
+    Ok(controller.playlist_manager.play_mode.clone())
+}
+
+pub fn get_play_mode(
+    controller: State<SharedPlayerController>
+) -> Result<play_mode::PlayMode, String> {
+    let controller = get_controller_lock(&controller);
+    Ok(controller.playlist_manager.play_mode.clone())
+}
+
+// 21. 获取当前播放索引
+#[tauri::command]
+pub fn get_current_index(
+    controller: State<SharedPlayerController>
+) -> Result<Option<usize>, String> {
+    let controller = get_controller_lock(&controller);
+    Ok(controller.playlist_manager.current_index)
+}
+
+// 22. 设置当前播放索引并播放
+#[tauri::command]
+pub fn set_and_play_index(
+    controller: State<SharedPlayerController>,
+    index: usize
+) -> Result<Option<Track>, String> {
+    tracing::info!("set_and_play_index called: {}", index);
+    let mut controller = get_controller_lock(&controller);
+    controller.playlist_manager.set_current_index(index)?;
+    controller.play();
+    Ok(controller.playlist_manager.get_current_track().cloned())
+}

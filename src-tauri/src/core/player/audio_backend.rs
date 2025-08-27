@@ -4,7 +4,8 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-
+use std::sync::atomic::Ordering;
+use tauri::{AppHandle, Emitter};
 use anyhow::Result;
 use rodio::{OutputStream, OutputStreamBuilder, Sink, Source};
 use symphonia::core::{
@@ -18,7 +19,7 @@ use symphonia::core::{
     units::{Time},
 };
 
-use crate::core::player::state::{PlaybackState, SharedState};
+use crate::core::player::state::{PlaybackState, SharedState, StateSnapshot};
 
 /// rodio 输出 + sink 生命周期，配合 symphonia 解码与精准 seek。
 pub struct AudioBackend {
@@ -26,10 +27,11 @@ pub struct AudioBackend {
     sink: Sink,            // 用 _stream.mixer() 创建
     state: SharedState,
     progress: ProgressClock,
+    app_handle: AppHandle,
 }
 
 impl AudioBackend {
-    pub fn new(state: SharedState) -> Result<Self> {
+    pub fn new(state: SharedState, app_handle: AppHandle) -> Result<Self> {
         // 创建默认输出流
         let stream = OutputStreamBuilder::open_default_stream()
             .map_err(|e| anyhow::anyhow!("open_default_stream failed: {e}"))?;
@@ -44,6 +46,7 @@ impl AudioBackend {
             sink,
             state,
             progress: ProgressClock::new(),
+            app_handle,
         })
     }
 
@@ -72,46 +75,52 @@ impl AudioBackend {
             s.set_total_duration(total);
             s.set_current_position(start_pos);
             s.set_playback_state(PlaybackState::Playing);
+            let snapshot = StateSnapshot::from(&*s);
+            self.app_handle.emit("player-state-updated", snapshot).unwrap_or_else(|e| eprintln!("player-state-updated emit load_and_play failed: {}", e));
         }
 
         self.progress.stop();
-        self.progress.start(start_pos, /*paused=*/ false, self.state.clone());
+        self.progress.start(start_pos, /*paused=*/ false, self.state.clone(), self.app_handle.clone());
 
         Ok(())
     }
 
     pub fn pause(&mut self) {
         self.sink.pause();
-        {
-            let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
-            s.set_playback_state(PlaybackState::Paused);
-        }
+        let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        s.set_playback_state(PlaybackState::Paused);
+        let snapshot = StateSnapshot::from(&*s);
+        self.app_handle.emit("player-state-updated", snapshot).unwrap_or_else(|e| eprintln!("player-state-updated emit pause failed: {}", e));
         self.progress.pause();
     }
 
     pub fn resume(&mut self) {
         self.sink.play();
-        {
-            let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
-            s.set_playback_state(PlaybackState::Playing);
-        }
+        let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        s.set_playback_state(PlaybackState::Playing);
+        let snapshot = StateSnapshot::from(&*s);
+        self.app_handle.emit("player-state-updated", snapshot).unwrap_or_else(|e| eprintln!("player-state-updated emit resume failed: {}", e));
         self.progress.resume();
     }
 
     pub fn stop(&mut self) {
         self.progress.stop();
         self.sink.stop();
-        {
-            let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
-            s.set_playback_state(PlaybackState::Stopped);
-            s.set_current_position(Duration::ZERO);
-            s.set_current_file(None);
-        }
+        let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        s.set_playback_state(PlaybackState::Stopped);
+        s.set_current_position(Duration::ZERO);
+        s.set_current_file(None);
+        let snapshot = StateSnapshot::from(&*s);
+        self.app_handle.emit("player-state-updated", snapshot).unwrap_or_else(|e| eprintln!("player-state-updated emit stop failed: {}", e));
     }
 
     pub fn set_volume(&mut self, volume: f32) {
+        let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        s.set_volume(volume);
         self.sink.set_volume(volume);
-        self.state.lock().unwrap_or_else(|e| e.into_inner()).set_volume(volume);
+        let snapshot = StateSnapshot::from(&*s);
+        self.app_handle.emit("player-state-updated", snapshot)
+            .unwrap_or_else(|e| eprintln!("player-state-updated emit set_volume failed: {}", e));
     }
 
     /// 通过重建 Source 来实现精准跳转（兼容大多数压缩/封装）
@@ -143,6 +152,8 @@ impl AudioBackend {
             let mut s = self.state.lock().unwrap_or_else(|e| e.into_inner());
             s.set_total_duration(total);
             s.set_current_position(position);
+            let snapshot = StateSnapshot::from(&*s);
+            self.app_handle.emit("player-state-updated", snapshot).unwrap_or_else(|e| eprintln!("player-state-updated emit seek failed: {}", e));
         }
 
         Ok(())
@@ -156,6 +167,8 @@ impl AudioBackend {
         s.set_playback_state(PlaybackState::Stopped);
         s.set_current_position(Duration::ZERO);
         s.set_current_file(None);
+        let snapshot = StateSnapshot::from(&*s);
+        self.app_handle.emit("player-state-updated", snapshot).unwrap_or_else(|e| eprintln!("player-state-updated emit shutdown failed: {}", e));
     }
 }
 
@@ -176,6 +189,7 @@ struct ProgressCtl {
     start_instant: Mutex<Option<Instant>>, // None 表示暂停
     paused: Mutex<bool>,
     quit: std::sync::atomic::AtomicBool,
+    app_handle: AppHandle
 }
 
 impl ProgressClock {
@@ -183,7 +197,7 @@ impl ProgressClock {
         Self { inner: None }
     }
 
-    fn start(&mut self, pos: Duration, paused: bool, state: SharedState) {
+    fn start(&mut self, pos: Duration, paused: bool, state: SharedState, app_handle: AppHandle) {
         self.stop();
 
         let ctl = Arc::new(ProgressCtl {
@@ -192,6 +206,7 @@ impl ProgressClock {
             start_instant: Mutex::new(Some(Instant::now())),
             paused: Mutex::new(paused),
             quit: std::sync::atomic::AtomicBool::new(false),
+            app_handle
         });
 
         let ctl2 = ctl.clone();
@@ -218,12 +233,22 @@ impl ProgressClock {
                 if let Some(total) = s.total_duration() {
                     let pos_now_clamped = pos_now.min(total);
                     s.set_current_position(pos_now_clamped);
+                    let snapshot = StateSnapshot::from(&*s);
+                    ctl2.app_handle.emit("player-state-updated", snapshot)
+                        .unwrap_or_else(|e| eprintln!("player-state-updated emit progress failed: {}", e));
+
                     if pos_now_clamped >= total && s.is_playing() {
                         s.set_playback_state(PlaybackState::Stopped);
+                        let snapshot = StateSnapshot::from(&*s);
+                        ctl2.app_handle.emit("player-state-updated", snapshot)
+                            .unwrap_or_else(|e| eprintln!("player-state-updated emit progress end failed: {}", e));
                         ctl2.quit.store(true, Ordering::Relaxed);
                     }
                 } else {
                     s.set_current_position(pos_now);
+                    let snapshot = StateSnapshot::from(&*s);
+                    ctl2.app_handle.emit("player-state-updated", snapshot)
+                        .unwrap_or_else(|e| eprintln!("player-state-updated emit progress failed: {}", e));
                 }
             }
         });

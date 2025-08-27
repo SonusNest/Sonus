@@ -1,359 +1,145 @@
 <p align="center">
-<a href="https://github.com/SonusTeam/Sonus"><img src="https://file.lingke.ink/sonus/sonus-en.webp" alt="pARPxN8.png" border="0" /></a>
+  <a href="https://github.com/SonusTeam/Sonus">
+    <img src="https://file.lingke.ink/sonus/sonus-en.webp" alt="Sonus Logo" width="200" height="200">
+  </a>
 </p>
 
-English | [简体中文](https://github.com/SonusTeam/Sonus/blob/master/README-ZH.md)
+<h1 align="center">Sonus</h1>
 
-# Sonus
+<p align="center">
+  <a href="https://github.com/SonusTeam/Sonus/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/SonusTeam/Sonus/build.yml?style=flat-square" alt="Build Status">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/SonusTeam/Sonus?style=flat-square" alt="License">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/releases">
+    <img src="https://img.shields.io/github/v/release/SonusTeam/Sonus?include_prereleases&style=flat-square" alt="Latest Release">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/stargazers">
+    <img src="https://img.shields.io/github/stars/SonusTeam/Sonus?style=flat-square" alt="Stars">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/issues">
+    <img src="https://img.shields.io/github/issues/SonusTeam/Sonus?style=flat-square" alt="Issues">
+  </a>
+  <a href="https://discord.gg/yourserver">
+    <img src="https://img.shields.io/discord/yourserverid?style=flat-square&label=Discord" alt="Discord">
+  </a>
+</p>
+
+<p align="center">
+  English | <a href="https://github.com/SonusTeam/Sonus/blob/master/README-ZH.md">简体中文</a>
+</p>
+
 Sonus is an open-source, lightweight cross-platform desktop application developed with Tauri + Rust. As a private music library management player, it not only manages music stored locally on the running device but also enables localized management of music in home private clouds (NAS) or remote servers via WebDAV and SMB protocols.
 
-The project is currently in the initial development phase, and the production environment is not yet ready.
+## ✨ Features
 
-## Project Development TODO
-Currently, this TODO list primarily targets Windows platform development. macOS and Linux support will be added concurrently upon the release of the 1.0 stable version.
-### Backend Development
+- **Local & Network Music Management**
+  - Organize and play music from local storage
+  - Connect to WebDAV and SMB servers for remote music management
+  - Automatic metadata extraction and organization
 
-#### Core Infrastructure
-- [ ] `src/main.rs`
-    - [x] Initialize Tauri application with proper configuration
-    - [x] Set up application window dimensions and properties
-    - [ ] Register all IPC commands from `ipc::commands`
-    - [ ] Configure application lifecycle hooks
-    - [ ] Set up error handling for application startup
+- **Powerful Playback**
+  - Support for common audio formats (MP3, FLAC, WAV, etc.)
+  - Multiple playback modes (repeat, shuffle, etc.)
+  - High-quality audio output
 
-#### IPC Communication Layer
-- [ ] `src/ipc/mod.rs`
-    - [ ] Export all IPC modules and public interfaces
-    - [ ] Define unified error type for IPC operations
+- **Modern UI**
+  - Clean and intuitive interface
+  - Light/dark mode support
+  - Customizable themes
+  - Responsive design for different window sizes
 
-- [ ] `src/ipc/commands.rs`
-    - [ ] Implement `play` command with track ID parameter
-    - [ ] Implement `pause` command
-    - [ ] Implement `stop` command
-    - [ ] Implement `next_track` and `previous_track` commands
-    - [ ] Implement `set_volume` command with percentage parameter
-    - [ ] Implement `seek` command with position parameter
-    - [ ] Implement `scan_music_library` command
-    - [ ] Implement `create_playlist` command
-    - [ ] Implement `add_to_playlist` command
-    - [ ] Implement `search_library` command with query parameter
+- **Advanced Library Features**
+  - Search and filter by artist, album, genre, etc.
+  - Create and manage playlists
+  - Album art display and organization
 
-- [ ] `src/ipc/events.rs`
-    - [ ] Define `playback_state_changed` event
-    - [ ] Define `track_changed` event with new track metadata
-    - [ ] Define `progress_updated` event with current position
-    - [ ] Define `volume_changed` event
-    - [ ] Define `library_scan_started` and `library_scan_completed` events
-    - [ ] Implement event emission system
+## 📥 Installation
 
-- [ ] `src/ipc/types.rs`
-    - [x] Define `Track` struct with serde serialization
-    - [ ] Define `PlaybackState` enum (Playing/Paused/Stopped)
-    - [x] Define `Playlist` struct
-    - [x] Define `LibraryScanProgress` struct
-    - [ ] Define `SearchResults` struct
-    - [ ] Ensure all types implement proper serialization/deserialization
+### Windows
+- Download the latest installer from the [releases page](https://github.com/SonusTeam/Sonus/releases)
+- Run the installer and follow the on-screen instructions
 
-#### Application Control Layer
-- [ ] `src/app/mod.rs`
-    - [ ] Export window and tray modules
+### macOS
+- Support will be added in version 1.0 stable release
 
-- [ ] `src/app/window.rs`
-    - [x] Implement window minimization functionality
-    - [x] Implement window maximization/restoration
-    - [ ] Implement window closing behavior (minimize to tray option)
-    - [x] Implement window material settings
-    - [x] Add borderless window mode support
-    - [ ] Overwrite the original close window logic
-    - [ ] Implement window transparency settings
+### Linux
+- Support will be added in version 1.0 stable release
 
-- [ ] `src/app/tray.rs`
-    - [ ] Create system tray icon
-    - [ ] Implement tray context menu (Play/Pause/Exit)
-    - [ ] Add tooltip showing current track
-    - [ ] Implement "Show/Hide" application window from tray
-    - [ ] Add tray icon animation for playback state
+## 🚀 Getting Started
 
-#### Core Business Logic
-- [ ] `src/core/mod.rs`
-    - [ ] Export all core modules
-    - [ ] Set up core initialization sequence
+1. Launch Sonus after installation
+2. Add your music library:
+  - Click on "Settings" > "Library"
+  - Add local folders or connect to WebDAV/SMB servers
+3. Let Sonus scan and index your music collection
+4. Browse your library, create playlists, and enjoy your music
 
-- [ ] `src/core/player/mod.rs`
-    - [ ] Export player controller, backend and state modules
+## 🔧 Development
 
-- [ ] `src/core/player/controller.rs`
-    - [ ] Implement play functionality with track loading
-    - [ ] Implement pause/resume functionality
-    - [ ] Implement stop functionality
-    - [ ] Add track seeking capability
-    - [ ] Implement volume control
-    - [ ] Add track position query method
-    - [ ] Implement track duration calculation
+### Prerequisites
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Node.js](https://nodejs.org/)
+- [Tauri CLI](https://tauri.app/v2/guides/getting-started/prerequisites/)
 
-- [ ] `src/core/player/audio_backend.rs`
-    - [ ] Integrate rodio audio library
-    - [ ] Add support for common audio formats (MP3, FLAC, WAV, etc.)
-    - [ ] Implement audio stream management
-    - [ ] Add error handling for audio playback issues
-    - [ ] Optimize audio buffer management
+### Setup
+```bash
+# Clone the repository
+git clone https://github.com/SonusTeam/Sonus.git
+cd Sonus
 
-- [ ] `src/core/player/state.rs`
-    - [ ] Create playback state struct
-    - [ ] Implement current track tracking
-    - [ ] Add progress tracking with timestamp updates
-    - [ ] Implement volume level storage
-    - [ ] Add playback status flags (buffering, error, etc.)
+# Install dependencies
+pnpm install
 
-- [ ] `src/core/library/mod.rs`
-    - [ ] Export library modules
+# Start development server
+pnpm tauri dev
+```
 
-- [ ] `src/core/library/scanner.rs`
-    - [x] Implement directory traversal for music files
-    - [ ] WebDAV supported 
-    - [ ] SMB supported
-    - [ ] Implement scan progress tracking
-    - [ ] Implement incremental scanning (only new files)
+### Building
+```bash
+# Build for production
+pnpm tauri build
+```
 
-- [ ] `src/core/library/metadata.rs`
-    - [x] Implement audio metadata extraction
-    - [x] Parse mostly tags for most common files
-    - [x] Extract album art
-    - [x] Handle missing or corrupted metadata gracefully
-    - [x] Normalize metadata fields across formats
-    - [ ] Optimize code to improve robustness
+## 📋 Roadmap
+The project is currently in the initial development phase. Key upcoming features include:
+- Complete WebDAV and SMB support
+- Advanced audio quality settings
+- Shortcut key configuration
+- Enhanced theme customization
+- Cross-platform support for macOS and Linux
+- Additional metadata management tools
 
-- [ ] `src/core/library/index.rs`
-    - [x] Implement index persistence to sqlite
-    - [x] Add indexing by artist, album, genre
-    - [ ] Add index validation and repair
+For a detailed list of current development tasks, see our TODO list.
 
-- [ ] `src/core/library/search.rs`
-    - [ ] Implement fuzzy search for tracks
-    - [ ] Add search by title, artist, album
-    - [ ] Implement advanced search with filters
-    - [ ] Add search result ranking
-    - [ ] Implement search query parsing
-    - [ ] Add search by lyrics
+## 🤝 Contributing
+Contributions are welcome! Please read our [Contributing Guide](https://github.com/SonusTeam/Sonus/CONTRIBUTING.md) before submitting a pull request.
 
-- [ ] `src/core/playlist/mod.rs`
-    - [ ] Export playlist modules
 
-- [ ] `src/core/playlist/manager.rs`
-    - [x] Implement core playlist logic
-    - [ ] Implement playlist creation
-    - [ ] Add playlist deletion
-    - [x] Implement track addition to playlists
-    - [x] Add track removal from playlists
-    - [ ] Implement playlist renaming
-    - [ ] Add playlist reordering
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-- [ ] `src/core/playlist/play_mode.rs`
-    - [x] Add repeat single track mode
-    - [x] Implement repeat all mode
-    - [x] Add shuffle mode
-    - [ ] Implement smart shuffle (avoid recent repeats)
+## 🐛 Issues
+If you encounter any issues, please report them on our [issue tracker](https://github.com/SonusTeam/Sonus/issues).
 
-- [ ] `src/core/playlist/persistence.rs`
-    - [ ] Implement playlist saving to sqlite
-    - [ ] Add playlist loading from sqlite
+## 📄 License
+Sonus is licensed under the [GNU General Public License v3.0](https://github.com/SonusTeam/Sonus/LICENSE).
 
-- [ ] `src/core/state/mod.rs`
-    - [ ] Export global state and observer modules
+## 💬 Community
 
-- [ ] `src/core/state/global.rs`
-    - [ ] Create global application state struct
-    - [ ] Implement thread-safe access patterns
-    - [ ] Add state initialization and reset
-    - [ ] Implement state validation
-    - [ ] Add state snapshot capability
+- Discord - Join our community chat
+- QQ Group - 755353142
 
-- [ ] `src/core/state/observer.rs`
-    - [ ] Implement observer pattern for state changes
-    - [ ] Add subscription system for state events
-    - [ ] Implement efficient event propagation
-    - [ ] Add unsubscribe functionality
-    - [ ] Implement event batching for performance
+## 🙏 Acknowledgements
 
-#### Utilities
-- [ ] `src/utils/mod.rs`
-    - [ ] Export all utility modules
+Sonus thanks JetBrains RustRover IDE for supporting open source projects
 
-- [ ] `src/utils/error.rs`
-    - [ ] Define custom error enum for application
-    - [ ] Implement error conversion from dependencies
-    - [ ] Add error messages localization support
-    - [ ] Implement error logging functionality
-    - [ ] Add user-friendly error descriptions
+<p align="center">
+Made with ❤️ by the Sonus Team and Contributors.
+</p>
 
-- [ ] `src/utils/logger.rs`
-    - [ ] Set up logging framework
-    - [ ] Implement log levels (debug, info, warn, error)
-    - [ ] Add file logging capability
-    - [x] Implement console logging
-    - [ ] Add log rotation for large log files
-    - [x] Implement log filtering by module
-
-- [ ] `src/utils/fs.rs`
-    - [ ] Implement cross-platform path handling
-    - [ ] Add file existence checks
-    - [ ] Implement directory creation
-    - [ ] Add file deletion functionality
-    - [ ] Implement safe file writing (atomic writes)
-    - [ ] Add file type detection
-
-- [ ] `src/utils/lifecycle.rs`
-    - [ ] Implement application startup sequence
-    - [ ] Add graceful shutdown handling
-    - [ ] Implement application suspension/resumption
-    - [ ] Add cleanup routines
-    - [ ] Implement crash recovery
-
-#### Assets
-- [ ] `src/assets/icons/`
-    - [ ] Create application icons in various sizes
-    - [x] Add playback control icons
-    - [ ] Create tray icons for different states
-    - [ ] Add theme-specific icons (light/dark)
-    - [ ] Implement high-DPI icon support
-
-### Frontend Development (Web)
-
-#### Foundation
-- [ ] Project setup
-    - [x] Configure Vue framework
-    - [x] Set up TypeScript integration
-    - [ ] Configure build tools for Tauri
-    - [x] Set up CSS framework (Tailwind)
-    - [x] Configure ESLint and code formatting
-
-- [ ] Routing
-    - [x] Implement main application routes
-    - [x] Add navigation between views
-    - [ ] Implement route guards for protected views
-    - [ ] Add history management
-    - [ ] Implement deep linking support
-
-- [ ] State management
-    - [x] Set up frontend state management
-    - [ ] Create store for player state
-    - [ ] Implement library state management
-    - [ ] Add playlist state management
-    - [x] Implement UI state persistence
-
-#### Core Components
-- [x] Player controls
-    - [x] Create play/pause button component
-    - [x] Implement previous/next track buttons
-    - [x] Create progress bar with seek functionality
-    - [x] Implement volume control slider
-    - [x] Add repeat mode toggle
-    - [x] Implement shuffle mode toggle
-
-- [x] Now playing display
-    - [x] Create current track information panel
-    - [x] Implement album art display
-    - [x] Add artist/album links
-    - [x] Create lyric display component
-    - [x] Implement track duration display
-
-- [ ] Music library views
-    - [ ] Create album grid view
-    - [ ] Implement artist list view
-    - [x] Add track list view
-    - [ ] Create genre filtering view
-    - [x] Implement sortable columns
-    - [ ] Add pagination for large libraries
-
-- [ ] Playlist management
-    - [ ] Create playlist list component
-    - [ ] Implement playlist creation form
-    - [ ] Add track addition interface
-    - [ ] Create playlist editing interface
-    - [ ] Implement drag-and-drop reordering
-    - [ ] Add playlist deletion confirmation
-
-- [ ] Search functionality
-    - [ ] Create search input component
-    - [ ] Implement real-time search results
-    - [ ] Add advanced search filters
-    - [ ] Create search result categorization
-    - [ ] Implement search history
-
-#### Pages
-- [x] Main application layout
-    - [x] Create sidebar navigation
-    - [x] Implement main content area
-    - [x] Add footer with player controls
-    - [x] Create responsive layout for different window sizes
-
-- [ ] Library page
-    - [x] Implement tabbed interface (Songs/Albums/Artists)
-    - [x] Add filtering controls
-    - [ ] Implement batch operations
-    - [ ] Create context menus for tracks
-
-- [ ] Playlist page
-    - [ ] Implement playlist track listing
-    - [ ] Add track removal controls
-    - [ ] Create playlist information panel
-    - [ ] Implement track count and total duration display
-
-- [ ] Now playing page
-    - [ ] Create expanded player view
-    - [ ] Implement large album art display
-    - [ ] Add detailed track information
-    - [ ] Create enhanced progress visualization
-
-- [ ] Settings page
-    - [ ] Implement library location configuration
-    - [x] Add appearance settings
-    - [ ] Create audio quality settings
-    - [ ] Implement shortcut key configuration
-    - [x] Add about/version information
-
-#### IPC Integration
-- [ ] Backend communication service
-    - [ ] Create wrapper for Tauri IPC calls
-    - [ ] Implement type-safe IPC interfaces
-    - [ ] Add error handling for IPC operations
-    - [ ] Create request batching for performance
-
-- [ ] Event handling
-    - [ ] Set up listeners for playback events
-    - [ ] Implement library update event handlers
-    - [ ] Add UI updates for state changes
-    - [ ] Create debounced handlers for frequent events
-
-#### UI/UX Enhancements
-- [ ] Theming
-    - [x] Implement light/dark modes
-    - [ ] Add accent color customization
-    - [ ] Create high-contrast mode
-    - [ ] Implement custom theme support
-
-- [ ] Animations
-    - [ ] Add transition between views
-    - [ ] Implement playback state animations
-    - [ ] Create hover effects for interactive elements
-    - [ ] Add loading indicators
-
-- [ ] Responsive design
-    - [ ] Optimize for different window sizes
-    - [ ] Add touch-friendly controls
-    - [ ] Create collapsible UI elements
-
-- [ ] Accessibility
-    - [ ] Implement keyboard navigation
-    - [ ] Ensure color contrast compliance
-    - [ ] Implement focus indicators
-
-#### Testing & Polish
-- [ ] Unit tests for components
-- [ ] Integration tests for user flows
-- [ ] Performance optimization
-- [ ] Cross-platform testing
-- [ ] UI refinement and bug fixes
-- [ ] Localization support for multiple languages
-
-# The journey is long and arduous, and we look forward to your contributions.

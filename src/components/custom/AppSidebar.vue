@@ -1,44 +1,53 @@
 <template>
-    <SidebarProvider class="h-full">
+    <div class="h-full w-full flex flex-row overflow-hidden">
+      <SidebarProvider class="h-full w-full">
         <Sidebar v-bind="props" :class="{ close: !sidebarState }" class="sidebar">
-            <SidebarContent class="sidebar-content w-[15rem] max-w-[15rem] transition-transform duration-350 pl-2">
-                <Collapsible v-for="item in items" :key="item.title" :title="item.title" default-open
-                    class="group/collapsible w-full">
-                    <SidebarGroup class="p-0 w-full">
-                        <SidebarGroupLabel as-child class="group/label text-sm text-sidebar-foreground h-6 pr-0">
-                            <CollapsibleTrigger class="text-sidebar-foreground/60 text-xs font-bold">
-                                {{ item.title }}
-                                <ChevronRight
-                                    class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                            </CollapsibleTrigger>
-                        </SidebarGroupLabel>
-                        <CollapsibleContent class="w-full">
-                            <SidebarGroupContent>
-                                <SidebarMenu class="w-full">
-                                    <SidebarMenuItem v-for="childItem in item.items" :key="childItem.title"
-                                        class="w-full">
-                                        <SidebarMenuButton as-child :is-active="childItem.isActive" class="w-full cursor-pointer">
-                                            <a href="#"
-                                                @click="router.push(childItem.url)"
-                                                class="w-full text-ellipsis whitespace-nowrap overflow-hidden"
-                                                :title="childItem.title">
-                                                <component :is="childItem.icon" />
-                                                {{ childItem.title }}
-                                            </a>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                </SidebarMenu>
-                            </SidebarGroupContent>
-                        </CollapsibleContent>
-                    </SidebarGroup>
-                </Collapsible>
-            </SidebarContent>
-            <SidebarRail />
+          <SidebarContent class="sidebar-content w-[15rem] max-w-[15rem] transition-transform duration-350 pl-2">
+            <Collapsible v-for="item in items" :key="item.title" :title="item.title" default-open
+                         class="group/collapsible w-full">
+              <SidebarGroup class="p-0 w-full">
+                <SidebarGroupLabel as-child class="group/label text-sm text-sidebar-foreground h-6 pr-0">
+                  <CollapsibleTrigger class="text-sidebar-foreground/60 text-xs font-bold">
+                    {{ item.title }}
+                    <ChevronRight
+                        class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </CollapsibleTrigger>
+                </SidebarGroupLabel>
+                <CollapsibleContent class="w-full">
+                  <SidebarGroupContent>
+                    <SidebarMenu class="w-full">
+                      <SidebarMenuItem v-for="childItem in item.items" :key="childItem.title"
+                                       class="w-full">
+                        <SidebarMenuButton as-child :is-active="childItem.isActive" class="w-full cursor-pointer">
+                          <a href="#"
+                             @click="router.push(childItem.url)"
+                             class="w-full text-ellipsis whitespace-nowrap overflow-hidden"
+                             :title="childItem.title">
+                            <component :is="childItem.icon" />
+                            {{ childItem.title }}
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </SidebarContent>
+          <SidebarRail />
         </Sidebar>
         <SidebarInset class="rounded-2xl border overflow-auto h-full w-full mr-3 ml-3 bg-sidebar/80 p-5">
-            <RouterView />
+          <RouterView />
         </SidebarInset>
-    </SidebarProvider>
+      </SidebarProvider>
+      <div :class="{ close: !rightAreaState }" class="rightArea w-100 h-full">
+        <!-- 给内容容器添加 overflow-y-auto 和 h-full 确保滚动效果 -->
+        <div class="rightArea-content w-100 h-full transition-transform duration-350 pr-2">
+            <LyricsComponent v-if="rightArea === 'lyrics'"/>
+            <PlaylistComponent v-if="rightArea === 'playlist'"/>
+        </div>
+      </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -74,6 +83,14 @@ import {
     SidebarRail
 } from "@/components/ui/sidebar"
 import { useRouter } from "vue-router"
+
+import {computed,
+  // ref
+} from 'vue'
+import { useAppStore } from '@/stores/appStore'
+import PlaylistComponent from "@/components/custom/PlaylistComponent.vue";
+import LyricsComponent from "@/components/custom/LyricsComponent.vue";
+
 const router = useRouter()
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -177,15 +194,20 @@ const items = [
     },
 ]
 
-import { computed } from 'vue'
-import { useAppStore } from '@/stores/appStore'
 
 // 获取appStore实例
 const appStore = useAppStore()
-
+// const playerStore = usePlayerStore()
 // 通过计算属性获取sidebarState状态
 const sidebarState = computed(() => {
     return appStore.getSidebarState
+})
+
+const rightArea = computed(() => {
+    return appStore.getRightArea
+})
+const rightAreaState = computed(() => {
+    return appStore.getRightAreaState
 })
 </script>
 
@@ -203,5 +225,15 @@ const sidebarState = computed(() => {
 
 .sidebar.close .sidebar-content {
     transform: translateX(-100%);
+}
+
+.rightArea {
+  transition: width 0.3s ease-in-out;
+}
+.rightArea-content {
+  transform: translateX(0);
+}
+.rightArea.close .rightArea-content {
+  transform: translateX(100%);
 }
 </style>
