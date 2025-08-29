@@ -22,7 +22,7 @@
   <a href="https://github.com/SonusTeam/Sonus/issues">
     <img src="https://img.shields.io/github/issues/SonusTeam/Sonus?style=flat-square" alt="Issues">
   </a>
-  <a href="https://discord.gg/yourserver">
+  <a href="https://discord.gg/Udq8xrruA3">
     <img src="https://img.shields.io/discord/yourserverid?style=flat-square&label=Discord" alt="Discord">
   </a>
 </p>
