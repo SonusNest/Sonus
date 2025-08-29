@@ -1,359 +1,153 @@
 <p align="center">
-<a href="https://github.com/SonusTeam/Sonus"><img src="https://file.lingke.ink/sonus/sonus-zh.webp" alt="pARPxN8.png" border="0" /></a>
+  <a href="https://github.com/SonusTeam/Sonus">
+    <img src="https://file.lingke.ink/sonus/sonus-zh.webp" alt="Sonus 标志">
+  </a>
 </p>
 
-[English](https://github.com/SonusTeam/Sonus/blob/master/README.md) | 简体中文
+<h1 align="center">Sonus</h1>
 
-# Sonus
-Sonus 是一个使用 Tauri + Rust 开发的开源、轻量级跨平台桌面应用程序。作为私人音乐库管理播放器，它不仅管理运行设备本地存储的音乐，还能通过WebDAV和SMB协议实现对家庭私有云(NAS)或远程服务器上音乐的本地化管理。
+<p align="center">
+  <a href="https://github.com/SonusTeam/Sonus/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/SonusTeam/Sonus/build.yml?style=flat-square" alt="构建状态">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/SonusTeam/Sonus?style=flat-square" alt="许可证">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/releases">
+    <img src="https://img.shields.io/github/v/release/SonusTeam/Sonus?include_prereleases&style=flat-square" alt="最新版本">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/stargazers">
+    <img src="https://img.shields.io/github/stars/SonusTeam/Sonus?style=flat-square" alt="星标数">
+  </a>
+  <a href="https://github.com/SonusTeam/Sonus/issues">
+    <img src="https://img.shields.io/github/issues/SonusTeam/Sonus?style=flat-square" alt="问题数">
+  </a>
+  <a href="https://discord.gg/Udq8xrruA3">
+    <img src="https://img.shields.io/discord/yourserverid?style=flat-square&label=Discord" alt="Discord 社群">
+  </a>
+</p>
 
-项目目前处于初期开发阶段，生产环境尚未准备就绪。
+<p align="center">
+  <a href="https://github.com/SonusTeam/Sonus/blob/master/README.md">English</a> | 简体中文
+</p>
 
-## 项目开发待办事项
-当前待办事项主要针对Windows平台开发。macOS和Linux支持将在1.0稳定版发布时同步添加。
-### 后端开发
+Sonus 是一款基于 Tauri + Rust 开发的**开源轻量型跨平台桌面应用**，作为私人音乐库管理播放器，它不仅能管理运行设备本地存储的音乐，还可通过 WebDAV、SMB 协议，对家庭私有云（NAS）或远程服务器中的音乐进行本地化管理。
 
-#### 核心基础设施
-- [ ] `src/main.rs`
-    - [x] 使用适当配置初始化Tauri应用
-    - [x] 设置应用窗口尺寸和属性
-    - [ ] 从`ipc::commands`注册所有IPC命令
-    - [ ] 配置应用生命周期钩子
-    - [ ] 设置应用启动错误处理
 
-#### IPC通信层
-- [ ] `src/ipc/mod.rs`
-    - [ ] 导出所有IPC模块和公共接口
-    - [ ] 定义IPC操作统一错误类型
+## ✨ 核心功能
 
-- [ ] `src/ipc/commands.rs`
-    - [ ] 实现带轨道ID参数的`play`命令
-    - [ ] 实现`pause`命令
-    - [ ] 实现`stop`命令
-    - [ ] 实现`next_track`和`previous_track`命令
-    - [ ] 实现带百分比参数的`set_volume`命令
-    - [ ] 实现带位置参数的`seek`命令
-    - [ ] 实现`scan_music_library`命令
-    - [ ] 实现`create_playlist`命令
-    - [ ] 实现`add_to_playlist`命令
-    - [ ] 实现带查询参数的`search_library`命令
+- **本地与网络音乐管理**
+  - 整理并播放本地存储中的音乐
+  - 连接 WebDAV、SMB 服务器，实现远程音乐管理
+  - 自动提取并整理音乐元数据（如歌手、专辑信息等）
 
-- [ ] `src/ipc/events.rs`
-    - [ ] 定义`playback_state_changed`事件
-    - [ ] 定义带新轨道元数据的`track_changed`事件
-    - [ ] 定义带当前位置的`progress_updated`事件
-    - [ ] 定义`volume_changed`事件
-    - [ ] 定义`library_scan_started`和`library_scan_completed`事件
-    - [ ] 实现事件发射系统
+- **强大的播放功能**
+  - 支持常见音频格式（MP3、FLAC、WAV 等）
+  - 提供多种播放模式（循环、随机等）
+  - 高品质音频输出
 
-- [ ] `src/ipc/types.rs`
-    - [x] 定义带serde序列化的`Track`结构体
-    - [ ] 定义`PlaybackState`枚举(Playing/Paused/Stopped)
-    - [x] 定义`Playlist`结构体
-    - [x] 定义`LibraryScanProgress`结构体
-    - [ ] 定义`SearchResults`结构体
-    - [ ] 确保所有类型实现正确的序列化/反序列化
+- **现代化界面设计**
+  - 简洁直观的操作界面
+  - 支持亮色/暗色模式切换
+  - 可自定义主题
+  - 适配不同窗口尺寸的响应式设计
 
-#### 应用控制层
-- [ ] `src/app/mod.rs`
-    - [ ] 导出窗口和托盘模块
+- **进阶音乐库功能**
+  - 按歌手、专辑、流派等维度搜索筛选
+  - 创建并管理播放列表
+  - 专辑封面显示与整理
 
-- [ ] `src/app/window.rs`
-    - [x] 实现窗口最小化功能
-    - [x] 实现窗口最大化/恢复
-    - [ ] 实现窗口关闭行为(最小化到托盘选项)
-    - [x] 实现窗口材质设置
-    - [x] 添加无边框窗口模式支持
-    - [ ] 覆盖原始关闭窗口逻辑
-    - [ ] 实现窗口透明度设置
 
-- [ ] `src/app/tray.rs`
-    - [ ] 创建系统托盘图标
-    - [ ] 实现托盘上下文菜单(播放/暂停/退出)
-    - [ ] 添加显示当前轨道的工具提示
-    - [ ] 实现从托盘"显示/隐藏"应用窗口
-    - [ ] 为播放状态添加托盘图标动画
+## 📥 安装说明
 
-#### 核心业务逻辑
-- [ ] `src/core/mod.rs`
-    - [ ] 导出所有核心模块
-    - [ ] 设置核心初始化序列
+### Windows 系统
+1. 从 [发布页面](https://github.com/SonusTeam/Sonus/releases) 下载最新安装包
+2. 运行安装包，按照屏幕提示完成安装
 
-- [ ] `src/core/player/mod.rs`
-    - [ ] 导出播放器控制器、后端和状态模块
+### macOS 系统
+- 将于 1.0 正式版中新增支持
 
-- [ ] `src/core/player/controller.rs`
-    - [ ] 实现带轨道加载的播放功能
-    - [ ] 实现暂停/恢复功能
-    - [ ] 实现停止功能
-    - [ ] 添加轨道跳转能力
-    - [ ] 实现音量控制
-    - [ ] 添加轨道位置查询方法
-    - [ ] 实现轨道时长计算
+### Linux 系统
+- 将于 1.0 正式版中新增支持
 
-- [ ] `src/core/player/audio_backend.rs`
-    - [ ] 集成rodio音频库
-    - [ ] 添加对常见音频格式的支持(MP3, FLAC, WAV等)
-    - [ ] 实现音频流管理
-    - [ ] 为音频播放问题添加错误处理
-    - [ ] 优化音频缓冲区管理
 
-- [ ] `src/core/player/state.rs`
-    - [ ] 创建播放状态结构体
-    - [ ] 实现当前轨道跟踪
-    - [ ] 添加带时间戳更新的进度跟踪
-    - [ ] 实现音量级别存储
-    - [ ] 添加播放状态标志(缓冲中、错误等)
+## 🚀 快速上手
 
-- [ ] `src/core/library/mod.rs`
-    - [ ] 导出库模块
+1. 安装完成后启动 Sonus
+2. 添加你的音乐库：
+   - 点击「设置」>「音乐库」
+   - 添加本地文件夹，或连接 WebDAV/SMB 服务器
+3. 等待 Sonus 扫描并索引你的音乐集
+4. 浏览音乐库、创建播放列表，开始享受音乐
 
-- [ ] `src/core/library/scanner.rs`
-    - [x] 实现音乐文件目录遍历
-    - [ ] 支持WebDAV
-    - [ ] 支持SMB
-    - [ ] 实现扫描进度跟踪
-    - [ ] 实现增量扫描(仅新文件)
 
-- [ ] `src/core/library/metadata.rs`
-    - [x] 实现音频元数据提取
-    - [x] 解析大多数常见文件的标签
-    - [x] 提取专辑封面
-    - [x] 优雅处理缺失或损坏的元数据
-    - [x] 跨格式标准化元数据字段
-    - [ ] 优化代码提高健壮性
+## 🔧 开发指南
 
-- [ ] `src/core/library/index.rs`
-    - [x] 实现索引持久化到sqlite
-    - [x] 添加按艺术家、专辑、流派的索引
-    - [ ] 添加索引验证和修复
+### 前置依赖
+- [Rust](https://www.rust-lang.org/tools/install)（编程语言环境）
+- [Node.js](https://nodejs.org/)（JavaScript 运行环境）
+- [Tauri CLI](https://tauri.app/v2/guides/getting-started/prerequisites/)（Tauri 开发工具）
 
-- [ ] `src/core/library/search.rs`
-    - [ ] 实现轨道模糊搜索
-    - [ ] 添加按标题、艺术家、专辑搜索
-    - [ ] 实现带过滤器的高级搜索
-    - [ ] 添加搜索结果排名
-    - [ ] 实现搜索查询解析
-    - [ ] 添加按歌词搜索
+### 环境搭建
+```bash
+# 克隆代码仓库
+git clone https://github.com/SonusTeam/Sonus.git
+cd Sonus
 
-- [ ] `src/core/playlist/mod.rs`
-    - [ ] 导出播放列表模块
+# 安装依赖包
+pnpm install
 
-- [ ] `src/core/playlist/manager.rs`
-    - [x] 实现核心播放列表逻辑
-    - [ ] 实现播放列表创建
-    - [ ] 添加播放列表删除
-    - [x] 实现轨道添加到播放列表
-    - [x] 添加从播放列表移除轨道
-    - [ ] 实现播放列表重命名
-    - [ ] 添加播放列表重新排序
+# 启动开发服务器
+pnpm tauri dev
+```
 
-- [ ] `src/core/playlist/play_mode.rs`
-    - [x] 添加单曲循环模式
-    - [x] 实现全部循环模式
-    - [x] 添加随机播放模式
-    - [ ] 实现智能随机播放(避免近期重复)
+### 构建生产版本
+```bash
+# 构建生产环境安装包
+pnpm tauri build
+```
 
-- [ ] `src/core/playlist/persistence.rs`
-    - [ ] 实现播放列表保存到sqlite
-    - [ ] 添加从sqlite加载播放列表
 
-- [ ] `src/core/state/mod.rs`
-    - [ ] 导出全局状态和观察者模块
+## 📋 开发路线图
+目前项目处于初期开发阶段，重点规划功能如下：
+- 完善 WebDAV 与 SMB 协议支持
+- 新增进阶音频质量设置
+- 支持快捷键自定义配置
+- 增强主题自定义功能
+- 实现 macOS、Linux 跨平台支持
+- 增加更多元数据管理工具
 
-- [ ] `src/core/state/global.rs`
-    - [ ] 创建全局应用状态结构体
-    - [ ] 实现线程安全访问模式
-    - [ ] 添加状态初始化和重置
-    - [ ] 实现状态验证
-    - [ ] 添加状态快照能力
+如需查看当前开发任务详情，可参考项目 TODO 列表。
 
-- [ ] `src/core/state/observer.rs`
-    - [ ] 为状态变化实现观察者模式
-    - [ ] 添加状态事件订阅系统
-    - [ ] 实现高效事件传播
-    - [ ] 添加取消订阅功能
-    - [ ] 为实现性能实现事件批处理
 
-#### 实用工具
-- [ ] `src/utils/mod.rs`
-    - [ ] 导出所有实用工具模块
+## 🤝 贡献指南
+欢迎参与项目贡献！提交拉取请求（PR）前，请先阅读 [贡献指南](https://github.com/SonusTeam/Sonus/CONTRIBUTING.md)。
 
-- [ ] `src/utils/error.rs`
-    - [ ] 为应用定义自定义错误枚举
-    - [ ] 实现从依赖项转换错误
-    - [ ] 添加错误消息本地化支持
-    - [ ] 实现错误日志功能
-    - [ ] 添加用户友好的错误描述
+1. Fork 本项目仓库
+2. 创建功能分支（`git checkout -b feature/AmazingFeature`）
+3. 提交代码修改（`git commit -m 'Add some AmazingFeature'`）
+4. 推送分支至远程仓库（`git push origin feature/AmazingFeature`）
+5. 发起拉取请求（Pull Request）
 
-- [ ] `src/utils/logger.rs`
-    - [ ] 设置日志框架
-    - [ ] 实现日志级别(debug, info, warn, error)
-    - [ ] 添加文件日志能力
-    - [x] 实现控制台日志
-    - [ ] 为大日志文件添加日志轮转
-    - [x] 实现按模块过滤日志
 
-- [ ] `src/utils/fs.rs`
-    - [ ] 实现跨平台路径处理
-    - [ ] 添加文件存在检查
-    - [ ] 实现目录创建
-    - [ ] 添加文件删除功能
-    - [ ] 实现安全文件写入(原子写入)
-    - [ ] 添加文件类型检测
+## 🐛 问题反馈
+如遇到任何问题，请前往 [问题追踪器](https://github.com/SonusTeam/Sonus/issues) 提交反馈。
 
-- [ ] `src/utils/lifecycle.rs`
-    - [ ] 实现应用启动序列
-    - [ ] 添加优雅关闭处理
-    - [ ] 实现应用暂停/恢复
-    - [ ] 添加清理例程
-    - [ ] 实现崩溃恢复
 
-#### 资源
-- [ ] `src/assets/icons/`
-    - [ ] 创建各种尺寸的应用图标
-    - [x] 添加播放控制图标
-    - [ ] 为不同状态创建托盘图标
-    - [ ] 添加主题特定图标(浅色/深色)
-    - [ ] 实现高DPI图标支持
+## 📄 许可证
+Sonus 基于 [GNU 通用公共许可证 v3.0](https://github.com/SonusTeam/Sonus/LICENSE) 授权开源。
 
-### 前端开发(Web)
 
-#### 基础
-- [ ] 项目设置
-    - [x] 配置Vue框架
-    - [x] 设置TypeScript集成
-    - [ ] 为Tauri配置构建工具
-    - [x] 设置CSS框架(Tailwind)
-    - [x] 配置ESLint和代码格式化
+## 💬 社群交流
 
-- [ ] 路由
-    - [x] 实现主应用路由
-    - [x] 添加视图间导航
-    - [ ] 为受保护视图实现路由守卫
-    - [ ] 添加历史管理
-    - [ ] 实现深度链接支持
+- Discord - 加入社群聊天（链接见上方）
+- QQ 群 - 755353142
 
-- [ ] 状态管理
-    - [x] 设置前端状态管理
-    - [ ] 创建播放器状态存储
-    - [ ] 实现库状态管理
-    - [ ] 添加播放列表状态管理
-    - [x] 实现UI状态持久化
 
-#### 核心组件
-- [x] 播放器控制
-    - [x] 创建播放/暂停按钮组件
-    - [x] 实现上一曲/下一曲按钮
-    - [x] 创建带跳转功能的进度条
-    - [x] 实现音量控制滑块
-    - [x] 添加循环模式切换
-    - [x] 实现随机播放模式切换
+## 🙏 鸣谢
 
-- [x] 正在播放显示
-    - [x] 创建当前轨道信息面板
-    - [x] 实现专辑封面显示
-    - [x] 添加艺术家/专辑链接
-    - [x] 创建歌词显示组件
-    - [x] 实现轨道时长显示
+Sonus 感谢 JetBrains 提供的 RustRover IDE 对开源项目的支持
 
-- [ ] 音乐库视图
-    - [ ] 创建专辑网格视图
-    - [ ] 实现艺术家列表视图
-    - [x] 添加轨道列表视图
-    - [ ] 创建流派过滤视图
-    - [x] 实现可排序列
-    - [ ] 为大库添加分页
-
-- [ ] 播放列表管理
-    - [ ] 创建播放列表列表组件
-    - [ ] 实现播放列表创建表单
-    - [ ] 添加轨道添加界面
-    - [ ] 创建播放列表编辑界面
-    - [ ] 实现拖放重新排序
-    - [ ] 添加播放列表删除确认
-
-- [ ] 搜索功能
-    - [ ] 创建搜索输入组件
-    - [ ] 实现实时搜索结果
-    - [ ] 添加高级搜索过滤器
-    - [ ] 创建搜索结果分类
-    - [ ] 实现搜索历史
-
-#### 页面
-- [x] 主应用布局
-    - [x] 创建侧边栏导航
-    - [x] 实现主内容区域
-    - [x] 添加带播放器控制的页脚
-    - [x] 为不同窗口尺寸创建响应式布局
-
-- [ ] 库页面
-    - [x] 实现标签式界面(歌曲/专辑/艺术家)
-    - [x] 添加过滤控制
-    - [ ] 实现批量操作
-    - [ ] 为轨道创建上下文菜单
-
-- [ ] 播放列表页面
-    - [ ] 实现播放列表轨道列表
-    - [ ] 添加轨道移除控制
-    - [ ] 创建播放列表信息面板
-    - [ ] 实现轨道计数和总时长显示
-
-- [ ] 正在播放页面
-    - [ ] 创建扩展播放器视图
-    - [ ] 实现大专辑封面显示
-    - [ ] 添加详细轨道信息
-    - [ ] 创建增强进度可视化
-
-- [ ] 设置页面
-    - [ ] 实现库位置配置
-    - [x] 添加外观设置
-    - [ ] 创建音频质量设置
-    - [ ] 实现快捷键配置
-    - [x] 添加关于/版本信息
-
-#### IPC集成
-- [ ] 后端通信服务
-    - [ ] 为Tauri IPC调用创建包装器
-    - [ ] 实现类型安全的IPC接口
-    - [ ] 为IPC操作添加错误处理
-    - [ ] 为性能创建请求批处理
-
-- [ ] 事件处理
-    - [ ] 为播放事件设置监听器
-    - [ ] 实现库更新事件处理器
-    - [ ] 为状态变化添加UI更新
-    - [ ] 为频繁事件创建防抖处理器
-
-#### UI/UX增强
-- [ ] 主题
-    - [x] 实现浅色/深色模式
-    - [ ] 添加强调色自定义
-    - [ ] 创建高对比度模式
-    - [ ] 实现自定义主题支持
-
-- [ ] 动画
-    - [ ] 添加视图间过渡
-    - [ ] 实现播放状态动画
-    - [ ] 为交互元素创建悬停效果
-    - [ ] 添加加载指示器
-
-- [ ] 响应式设计
-    - [ ] 为不同窗口尺寸优化
-    - [ ] 添加触控友好控制
-    - [ ] 创建可折叠UI元素
-
-- [ ] 无障碍
-    - [ ] 实现键盘导航
-    - [ ] 确保颜色对比度合规
-    - [ ] 实现焦点指示器
-
-#### 测试与优化
-- [ ] 组件单元测试
-- [ ] 用户流程集成测试
-- [ ] 性能优化
-- [ ] 跨平台测试
-- [ ] UI细化和错误修复
-- [ ] 多语言本地化支持
-
-# 前路漫长而艰辛，我们期待您的贡献。
+<p align="center">
+由 Sonus 团队及贡献者们 用心打造 ❤️。
+</p>
