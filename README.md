@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/SonusTeam/Sonus">
-    <img src="https://file.lingke.ink/sonus/sonus-en.webp" alt="Sonus Logo" width="200" height="200">
+    <img src="https://file.lingke.ink/sonus/sonus-en.webp" alt="Sonus Logo">
   </a>
 </p>
 
