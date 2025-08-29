@@ -2,6 +2,7 @@ use chrono::{DateTime, NaiveDate, NaiveDateTime, ParseError, TimeZone, Utc};
 use rusqlite::{Row};
 use rusqlite::types::{Type, ValueRef};
 use serde::{Deserialize, Serialize};
+use tracing::warn;
 use crate::app::database::{connection, query_with_params};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -107,7 +108,7 @@ impl Track {
                     let s = match std::str::from_utf8(s) {
                         Ok(s) => s.trim(),
                         Err(_) => {
-                            eprintln!("警告: 列 {} 包含非UTF8字符串", col_idx);
+                            warn!("Column {} contains non-UTF8 string", col_idx);
                             return None;
                         }
                     };
@@ -139,13 +140,13 @@ impl Track {
 
                 // 其他类型（如Blob）视为无效
                 _ => {
-                    eprintln!("警告: 列 {} 包含不支持的类型", col_idx);
+                    warn!("Column {} contains unsupported type", col_idx);
                     return None;
                 }
             }
 
             // 所有解析都失败
-            eprintln!("警告: 无法解析列 {} 的值, 列索引: {}", col_idx, col);
+            warn!("Unable to parse column {} value: {}", col_idx, col);
             None
         }
 

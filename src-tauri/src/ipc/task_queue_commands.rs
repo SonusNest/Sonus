@@ -30,6 +30,5 @@ pub async fn get_task_stats(tracker: State<'_, TaskTracker>) -> Result<TaskStats
 /// Tauri命令：注册任务事件监听
 #[tauri::command]
 pub fn register_task_listener(window: Window) {
-    // 实际应用中可以在这里做一些初始化工作
     println!("前端已注册任务事件监听");
 }

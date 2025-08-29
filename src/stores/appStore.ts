@@ -13,7 +13,7 @@ export const useAppStore = defineStore('app', {
             }
         })(),
         rightAreaState: false,
-        rightArea: 'lyrics',
+        rightArea: 'none',
         developerOptionsDialogState: false,
         aboutDialogState: false,
         immersionDrawerState: false,

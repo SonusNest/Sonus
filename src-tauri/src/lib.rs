@@ -42,13 +42,38 @@ pub fn run() {
         .setup(|app| {
             // init app
             let app_handle = app.handle();
-            crate::app::init::init(&app_handle);
+            let app_handle_clone = app_handle.clone();
+            app::init::init(&app_handle);
             init_task_queue(app.handle().clone())?;
+            
             // init player
             let shared_state = core::player::state::new_shared_state();
             let player_controller = new_shared_player_controller(shared_state, app.handle().clone())
                 .expect("Failed to initialize player controller");
-            app.manage(player_controller);
+            app.manage(player_controller.clone());
+            
+            // Listening track-ended event
+            app_handle.listen("track-ended", move |_| {
+                info!("track-ended event triggered");
+                let app_handle_async = app_handle_clone.clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
+                    let state = app_handle_async.state::<SharedPlayerController>();
+
+                    match ipc::next_track(state) {
+                        Ok(Some(track)) => {
+                            info!("Auto-play next track: {:?}", track);
+                        }
+                        Ok(None) => {
+                            info!("No next track available, playlist ended.");
+                        }
+                        Err(e) => {
+                            error!("Failed to auto-play next track: {}", e);
+                        }
+                    }
+                });
+            });
+
             Ok(())
         })
         .run(tauri::generate_context!())
@@ -61,6 +86,7 @@ pub mod app;
 pub mod core;
 pub mod utils;
 
-use tauri::Manager;
+use tauri::{Listener, Manager};
+use tracing::{error, info};
 use core::task_queue::tauri_integration::init_task_queue;
-use crate::core::controller::{new_shared_player_controller, PlayerController};
+use crate::core::controller::{new_shared_player_controller, PlayerController, SharedPlayerController};

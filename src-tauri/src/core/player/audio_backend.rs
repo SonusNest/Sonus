@@ -242,6 +242,8 @@ impl ProgressClock {
                         let snapshot = StateSnapshot::from(&*s);
                         ctl2.app_handle.emit("player-state-updated", snapshot)
                             .unwrap_or_else(|e| eprintln!("player-state-updated emit progress end failed: {}", e));
+                        ctl2.app_handle.emit("track-ended", ())
+                            .unwrap_or_else(|e| eprintln!("emit track-ended failed: {}", e));
                         ctl2.quit.store(true, Ordering::Relaxed);
                     }
                 } else {

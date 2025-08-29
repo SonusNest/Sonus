@@ -198,6 +198,7 @@ const columns = [
         //@ts-ignore
         row.original.remark = ""
         const handlePlay = () => {
+          // @ts-ignore
           playerStore.playTrack([row.original as Track])
         };
 

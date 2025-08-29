@@ -68,7 +68,7 @@ router.afterEach(async () => {
     <!-- Internal Test Version Watermark -->
     <div class="absolute bottom-[100px] right-[100px] text-foreground/50">
       <p class="text-2xl font-bold">Internal Test Version</p>
-      <p class="text-sm text-right">v0.1.0-alpha-sha.gd90d9f8</p>
+      <p class="text-sm text-right">v0.1.3-alpha</p>
     </div>
   </div>
 </template>
